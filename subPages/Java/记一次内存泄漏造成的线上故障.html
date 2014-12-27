@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="../../stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>SmartMZ的装逼Block by smartmz</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>SmartMZ的装逼Block</h1>
+          <h2>论程序员的职业修为　　/*老师让你擦黑板; 我擦; 我擦||不擦*/</h2>
+        </header>
+        <hr>
+        <section id="main_content">
+          <h3>
+<a id="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages" aria-hidden="true"></a>【JAVA】 记一次内存泄漏造成的线上故障</h3>
+
+<p><strong>2014-12-21 私信附件故障</strong></p>
+<hr>
+<br/>
+<p>10:47	第一条报警日志</p>
+storage内存溢出	"内存溢出日志1行,请及时处理！[@1221_10:47]"
+
+扫storage日志：
+<pre><code>[root@tfsweb002 logs]# zgrep -i "outofmemory" debug_cn.log.2014122111.gz
+2014-12-21 11:00:08 214 [ERROR] Detected OutOfMemory potentia memory > 90%, stop broadcast presence !!!!!!
+2014-12-21 11:00:14 139 [ERROR] Detected OutOfMemory potentia memory > 90%, stop broadcast presence !!!!!!
+2014-12-21 11:00:20 779 [ERROR] Detected OutOfMemory potentia memory > 90%, stop broadcast presence !!!!!!
+2014-12-21 11:00:27 315 [ERROR] Detected OutOfMemory potentia memory > 90%, stop broadcast presence !!!!!!
+*** ***</code></pre>
+是私信工程打出来的日志，不是系统报警，查找来源：
+<pre><code>[root@wbim002 develop-tools]# ./wtool jargrep "Detected OutOfMemory potentia memory"  ../jarsource/
+find 'Detected OutOfMemory potentia memory' in ../jarsource/ 
+==> Found "Detected OutOfMemory potentia memory" in ../jarsource/api-commons-3.79.jar</code></pre>
+来源是平台依赖的基础包。相关代码为：
+<pre><code>double maxMemory = (double) runtime.maxMemory() / (1024 * 1024);
+double usedMemory = totalMemory - freeMemory;
+double percentFree = ((maxMemory - usedMemory) / maxMemory) * 100.0;
+if (percentFree < 10) {
+	outOfMemory.set(true);
+	log.error("Detected OutOfMemory potentia memory > 90%, stop broadcast presence !!!!!!");
+} else if (outOfMemory.get() == true && percentFree > 20) {
+	outOfMemory.set(false);
+	log.error("Detected memory return to normal, memory < 80%, resume broadcast presence.");
+}</code></pre>
+当时jvm的可用内存小于10%，触发报警。
+
+在报警机器上可以看到：
+<pre><code>[root@tfsweb002 home]# grep "java.lang.Thread.State: RUNNABLE" logs1221_jstack |wc -l
+611
+[root@tfsweb002 home]# grep "java.lang.Thread.State" logs1221_jstack |wc -l
+759</code></pre>
+而正常机器上的情况是：
+<pre><code>[root@tfsweb015 ~]# jstack 19474 |grep "java.lang.Thread.State: RUNNABLE"|wc -l 
+52
+[root@tfsweb015 ~]# jstack 19474 |grep "java.lang.Thread.State"|wc -l 
+704
+</code></pre>
+报警机器上jvm的RUNNABLE线程数很高。这里有两种可能：<p>1）请求量大　　2）线程累积</p>
+不管是哪种情况，都会占用大量jvm内存。
+
+<p>查询当时的请求量后发现当时的请求量和平时相比只上升了20%左右，说明出现了一定程度的2）情况。</p>
+<pre><code>[root@tfsweb015 ~]# jstat -gccause 19474
+  S0     S1     E      O      P     YGC     YGCT    FGC    FGCT     GCT    LGCC                 GCC                 
+  0.00  98.80  54.86  58.65  16.86   7352  407.399  7370 3784.086 4191.485 GCLocker Initiated GC No GC               
+ 97.85   0.00  97.08  38.87  16.86   7359  407.737  7372 3784.138 4191.875 GCLocker Initiated GC No GC
+
+Survivor和eden的使用率均到95%以上。GC次数很高。
+
+root@tfsweb002 logs1221]# jstack 19474 | grep "java.lang.Thread.State: RUNNABLE"
+"Attach Listener" daemon prio=10 tid=0x0000000047eaa800 nid=0x7adc waiting on condition [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Image Fetcher 0" daemon prio=10 tid=0x00002aaad04f0000 nid=0x7189 waiting on condition [0x000000006f1e3000]
+   java.lang.Thread.State: RUNNABLE
+        at sun.awt.image.JPEGImageDecoder.readImage(Native Method)
+******</code></pre>
+
+RUNNABLE - waiting on condition状态的方法主要是
+
+<p>com.sun.imageio.plugins.jpeg.JPEGImageReader.readImage(),共有68例</p>
+<p>com.sun.imageio.plugins.jpeg.JPEGImageReader.readImageHeader(),共有73例</p>
+
+堆栈：
+<pre><code>"catalina-exec-1315" daemon prio=10 tid=0x00002aaad053d000 nid=0x5138 waiting on condition [0x0000000067768000]
+   java.lang.Thread.State: RUNNABLE
+        at com.sun.imageio.plugins.jpeg.JPEGImageReader.readImageHeader(Native Method)
+        at com.sun.imageio.plugins.jpeg.JPEGImageReader.readNativeHeader(JPEGImageReader.java:532)
+        at com.sun.imageio.plugins.jpeg.JPEGImageReader.checkTablesOnly(JPEGImageReader.java:277)
+        at com.sun.imageio.plugins.jpeg.JPEGImageReader.gotoImage(JPEGImageReader.java:409)
+        at com.sun.imageio.plugins.jpeg.JPEGImageReader.getImageMetadata(JPEGImageReader.java:931)
+        at net.coobird.thumbnailator.util.exif.ExifUtils.getExifOrientation(Unknown Source)
+        at net.coobird.thumbnailator.tasks.io.InputStreamImageSource.read(Unknown Source)
+        at net.coobird.thumbnailator.tasks.SourceSinkThumbnailTask.read(Unknown Source)
+        at net.coobird.thumbnailator.Thumbnailator.createThumbnail(Unknown Source)
+        at net.coobird.thumbnailator.Thumbnails$Builder.toOutputStream(Unknown Source)
+        at cn.sina.as.util.ImageUtil.reSizeImage(ImageUtil.java:34)
+        at cn.sina.as.service.impl.AttachStorageServiceImpl.getStorageThumbnail(AttachStorageServiceImpl.java:733)
+        at cn.sina.as.api.servlet.AttachStorageDownloadThumbnailServlet.process(AttachStorageDownloadThumbnailServlet.java:79)
+        at cn.sina.as.api.servlet.AbstractAsServlet.process(AbstractAsServlet.java:48)
+        at cn.sina.as.api.servlet.BaseASServlet.doGet(BaseASServlet.java:37)
+******</code></pre>
+reSizeImage()的相关源码：
+
+<pre><code>public static byte[] reSizeImage(byte[] inImage, int resizeL, int resizeH) {
+	if (inImage == null) return null;
+	try {
+	    ByteArrayInputStream in = new ByteArrayInputStream(inImage);
+
+	    ByteArrayOutputStream out = new ByteArrayOutputStream();
+	    Thumbnails.of(in).size(resizeL, resizeH).toOutputStream(out);
+	    return out.toByteArray();
+	} catch (Exception e) {
+	    ApiLogger.warn("ImageUtil reSizeImage error, ", e);
+	    return inImage;
+	}
+}</code></pre>
+
+申请了in和out，在返回时没有close()，多线程情况下造成内存泄漏。
+
+<pre><code>[root@tfsweb015 ~]# jmap -histo 19474 | head
+
+ num     #instances         #bytes  class name
+----------------------------------------------
+   1:        250336     3972708320  [B
+   2:        283254       56727104  [C
+   3:        192806       32522808  [I
+   4:        397600       15904000  java.util.concurrent.ConcurrentHashMap$Segment
+   5:        398604       12755328  java.util.concurrent.locks.ReentrantLock$NonfairSync
+   6:        397600        9819184  [Ljava.util.concurrent.ConcurrentHashMap$HashEntry;
+   7:         64589        9561736  <constMethodKlass></code></pre>
+
+Byte[] 占用的heap最大。
+
+<pre><code>[root@tfsweb015 ~]# jmap -dump:format=b,file=/data0/heap.bin 19474</code></pre>
+使用Eclipse IDE Memory Analyzer分析如图。
+
+        </section>
+        <footer>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>        
+      </div>
+    </div>
+  </body>
+</html>
