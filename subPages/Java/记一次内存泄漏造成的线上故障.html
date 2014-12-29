@@ -155,7 +155,33 @@ reSizeImage()的相关源码：
 Byte[] 占用的heap最大。而从代码逻辑来看，私信附件的读入读出都使用Byte[].
 
 <pre><code>[root@tfsweb015 ~]# jmap -dump:format=b,file=/data0/heap.bin 19474</code></pre>
-<p>使用Eclipse IDE Memory Analyzer分析如图2。 </p>
+<p>使用Eclipse IDE Memory Analyzer分析如图2和图3。 </p>
+<p align="center">
+  <img src="../images/2.png" width="400" height="351"> </p>
+从图中可以看到，果然有内存泄漏，看起来是finalize()的内存泄漏。继续在jdk的javax.imageio中查找finalize的踪影，发现com.sun.imageio.stream.StreamFinalizer()会对ImageInputStream执行StreamFinalizer()方法，其中实现了finalize()：
+<pre><code>
+public class StreamFinalizer {
+    private ImageInputStream stream;
+
+    public StreamFinalizer(ImageInputStream stream) {
+        this.stream = stream;
+    }
+
+    protected void finalize() throws Throwable {
+        try {
+            stream.close();
+        } catch (IOException e) {
+        } finally {
+            stream = null;
+            super.finalize();
+        }
+    }
+}
+</code></pre>
+对该方法长长的注释说明：<br />
+Image{Input,Output}Stream如果被用户类继承；在构造时会构造StreamFinalizer。Image{Input,Output}Stream和StreamFinalizer彼此保留对方的应用，如果双方不可达，就会调用StreamFinalizer.finalize()，以便释放Image{Input,Output}Stream。<br />
+在reSizeImage()方法中，我们没有主动close(in，out)，由于finalize()真正的执行优先级比较低，平常负载不重的情况下有机会被调用，Image{Input,Output}Stream和可以被释放，但负载高的时候finalize()被调用的几率会很少，就造成内存泄漏。<br />
+
 <p>&nbsp;</p>
         </section>
         <footer>
