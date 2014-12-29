@@ -42,7 +42,7 @@
 </p>
 <h4>私信附件架构</h4>
 <p align="center">
-  <img src="../images/1.png" width="400" height="351"> </p>
+  <img src="../images/1.png" width="400"> </p>
 <h4>分析</h4>
 storage内存溢出	"内存溢出日志1行,请及时处理！[@1221_10:47]"
 
@@ -159,7 +159,7 @@ Byte[] 占用的heap最大。而从代码逻辑来看，私信附件的读入读
 <p align="center">
   <img src="../images/2.png" width="400"> </p>
   <p align="center">
-  <img src="../images/3.png" height="400"> </p>
+  <img src="../images/3.png" width="400"> </p>
 从图中可以看到，果然有内存泄漏，看起来是finalize()的内存泄漏。继续在jdk的javax.imageio中查找finalize的踪影，发现com.sun.imageio.stream.StreamFinalizer()会对ImageInputStream执行StreamFinalizer()方法，其中实现了finalize()：
 <pre><code>
 public class StreamFinalizer {
