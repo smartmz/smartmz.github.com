@@ -157,7 +157,7 @@ Byte[] 占用的heap最大。而从代码逻辑来看，私信附件的读入读
 <pre><code>[root@tfsweb015 ~]# jmap -dump:format=b,file=/data0/heap.bin 19474</code></pre>
 <p>使用Eclipse IDE Memory Analyzer分析如图2和图3。 </p>
 <p align="center">
-  <img src="../images/2.png" width="400" height="351"> </p>
+  <img src="../images/2.png" width="400"> </p>
 从图中可以看到，果然有内存泄漏，看起来是finalize()的内存泄漏。继续在jdk的javax.imageio中查找finalize的踪影，发现com.sun.imageio.stream.StreamFinalizer()会对ImageInputStream执行StreamFinalizer()方法，其中实现了finalize()：
 <pre><code>
 public class StreamFinalizer {
