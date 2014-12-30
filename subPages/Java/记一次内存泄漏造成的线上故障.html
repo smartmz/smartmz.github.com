@@ -130,7 +130,8 @@ org.apache.tomcat.util.threads.ThreadPool$ControlRunnable，13例。
         at cn.sina.as.api.servlet.AbstractAsServlet.process(AbstractAsServlet.java:48)
         at cn.sina.as.api.servlet.BaseASServlet.doGet(BaseASServlet.java:37)
 ******</code></pre>
-reSizeImage()的实现是有问题的，但是在下一节中再具体讨论，这一节主要讨论native方法waiting on condition的问题。
+reSizeImage()的实现是有问题的，但是在下一节中再具体讨论，这一节主要讨论native方法waiting on condition的问题。<br />
+sun.java2d.loops.TransformHelper.Transform()方法调用的是本地libawt.so中的方法，该动态库是JRE用来实现2D图像处理的本地库，Transform()的功能是将图像映射到系统用户内存空间，这需要系统为该操作分配内存空间，但是由于JVM的内存吃紧，没有足够的内存空间分配出来，导致该线程处于waiting on condition状态。
 <p class="inner_title">readImageHeader()</p>
 相关堆栈：
 <pre><code>"catalina-exec-1315" daemon prio=10 tid=0x00002aaad053d000 nid=0x5138 waiting on condition [0x0000000067768000]
@@ -151,7 +152,6 @@ reSizeImage()的实现是有问题的，但是在下一节中再具体讨论，�
         at cn.sina.as.api.servlet.BaseASServlet.doGet(BaseASServlet.java:37)
 ******</code></pre>
 reSizeImage()的相关源码：
-
 <pre><code>public static byte[] reSizeImage(byte[] inImage, int resizeL, int resizeH) {
 	if (inImage == null) return null;
 	try {
@@ -206,8 +206,8 @@ Byte[] 占用的heap最大。而从代码逻辑来看，私信附件的读入读
     }
 }</code></pre>
 对该方法长长的注释说明：<br />
-Image{Input,Output}Stream如果被用户类继承；在构造时会构造StreamFinalizer。Image{Input,Output}Stream和StreamFinalizer彼此保留对方的应用，如果双方不可达，就会调用StreamFinalizer.finalize()，以便释放Image{Input,Output}Stream。<br />
-在reSizeImage()方法中，我们没有主动close(in，out)，由于finalize()真正的执行优先级比较低，平常负载不重的情况下有机会被调用，Image{Input,Output}Stream和可以被释放，但负载高的时候finalize()被调用的几率会很少，就造成内存泄漏。<br />
+Image{Input,Output}Stream（接口）如果被实现，在实现类构造时会构造StreamFinalizer，Image{Input,Output}Stream和StreamFinalizer彼此保留对方的应用，如果双方不可达，就会调用StreamFinalizer.finalize()，以便在特殊情况下在GC回收之前释放Image{Input,Output}Stream。当然，Image{Input,Output}Stream的实现类也保留了finalize()方法的实现（置空），通过GC来回收，保证一般情况下的性能问题。<br />
+在reSizeImage()方法中，我们new了ByteArray{Input,Output}Stream，从上面堆栈的信息可以看出，通过net.coobird.thumbnailator包中的Thumbnailator.createThumbnail()方法将其重新封装为Image{Input,Output}Stream的子类FileCacheImage{Input,Output}Stream或FileImage{Input,Output}Stream，由于我们没有主动close(ByteArray{Input,Output}Stream)，导致FileCacheImage{Input,Output}Stream或FileImage{Input,Output}Stream不能手动释放，StreamFinalizer.finalize()方法也不能触发。而FileCacheImage{Input,Output}Stream或FileImage{Input,Output}Stream自己保留的finalize()执行优先级比较低，平常负载不重的情况下有机会被调用，资源可以被释放，但负载高的时候finalize()被调用的几率会很少。综合这些情况，造成内存泄漏。<br />
 <p class="inner_title">readImage()</p>
 相关堆栈：
 <pre><code>at com.sun.imageio.plugins.jpeg.JPEGImageReader.readImage(Native Method)
@@ -220,7 +220,7 @@ Image{Input,Output}Stream如果被用户类继承；在构造时会构造StreamF
         at net.coobird.thumbnailator.Thumbnails$Builder.toOutputStream(Unknown Source)
         at cn.sina.as.util.ImageUtil.reSizeImage(ImageUtil.java:34)
 		******</code></pre>
-好吧，又是reSizeImage()中的native方法调用导致的wait on condition. 
+好吧，又是reSizeImage()中的native方法调用导致的wait on condition. readImage()
 <p class="inner_title">ThreadPool$ControlRunnable</p>
 相关堆栈：
 <pre><code>"TP-Processor1" daemon prio=10 tid=0x00002aaab843a800 nid=0x6c69 in Object.wait() [0x000000004e7db000]
