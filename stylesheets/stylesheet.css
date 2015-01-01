@@ -103,6 +103,13 @@ header h2 {
 	background-color: yellow;
 }
 
+.pic_tip {
+	font-weight: 800;
+	font-size: 12px;
+	color: #333;
+	text-align:center;
+}
+
 #container .inner img {
   max-width: 100%;
 }
