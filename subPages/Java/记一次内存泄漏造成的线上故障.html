@@ -82,7 +82,7 @@ if (percentFree < 10) {
 报警机器上jvm的RUNNABLE线程数很高。这里有两种可能：<p>1）请求量大　　2）线程累积</p>
 不管是哪种情况，都会<font color="#FF0000">占用大量jvm内存</font>。
 
-<p>查询当时的请求量后发现当时的请求量和平时相比<font color="#3333CC">上升了20%左右</font>，量不是很大，说明两种情况均有可能出现。</p>
+<p>查询当时的请求量后发现当时的请求量和平时相比<font color="#3333CC">上升了20%左右</font>，量不是很大，说明两种情况均有可能出现。一个细节是附件本身的大小有增长，附件大小比较大。</p>
 <pre><code>[root@tfsweb015 ~]# jstat -gccause 19474
   S0     S1     E      O      P     YGC     YGCT    FGC    FGCT     GCT    LGCC                 GCC                 
   0.00  <font style="color:#F00">98.80</font>  54.86  58.65  16.86   7352  407.399  <font style="color:#F00">7370</font> 3784.086 4191.485 GCLocker Initiated GC No GC               
@@ -129,8 +129,8 @@ org.apache.tomcat.util.threads.ThreadPool$ControlRunnable，13例。
         at cn.sina.as.api.servlet.AbstractAsServlet.process(AbstractAsServlet.java:48)
         at cn.sina.as.api.servlet.BaseASServlet.doGet(BaseASServlet.java:37)
 ******</code></pre>
-reSizeImage()的实现是有问题的，但是在下一节中再具体讨论，这一节主要讨论native方法waiting on condition的问题。<br />
-sun.java2d.loops.TransformHelper.Transform()方法调用的是本地libawt.so中的方法，该动态库是JRE用来实现2D图像处理的本地库，Transform()的功能是将图像映射到系统用户内存空间，这需要系统为该操作分配内存空间，但是由于JVM的内存吃紧，没有足够的内存空间分配出来，导致该线程处于waiting on condition状态。
+reSizeImage()的实现是有问题的，但不是主要问题，在下一节中再具体讨论，这一节主要讨论native方法waiting on condition的问题。<br />
+sun.java2d.loops.TransformHelper.Transform()方法调用的是本地libawt.so中的方法，该动态库是JRE用来实现2D图像处理的本地库，Transform()的功能是将图像映射到系统用户内存空间，这需要系统为该操作分配内存空间，由于请求量和请求流的增长，JVM的内存吃紧，没有足够的内存空间分配出来，导致该线程处于waiting on condition状态，并且导致大量Full GC。
 <p class="inner_title">readImageHeader()</p>
 相关堆栈：
 <pre><code>"catalina-exec-1315" daemon prio=10 tid=0x00002aaad053d000 nid=0x5138 waiting on condition [0x0000000067768000]
@@ -164,7 +164,7 @@ reSizeImage()的相关源码：
 	}
 }</code></pre>
 
-申请了in和out，在返回时没有close()，多线程情况下造成内存泄漏。
+申请了in和out，在多线程负载重的情况下会一定程度上造成内存泄漏。
 
 <pre><code>[root@tfsweb015 ~]# jmap -histo 19474 | head
 
@@ -186,7 +186,7 @@ Byte[] 占用的heap最大。而从代码逻辑来看，私信附件的读入读
   <img src="../images/2.png" width="400"> </p>
   <p align="center">
   <img src="../images/3.png" width="400"> </p>
-从图中可以看到，果然有内存泄漏，看起来是finalize()的内存泄漏。继续在jdk的javax.imageio中查找finalize的踪影，发现com.sun.imageio.stream.StreamFinalizer()会对ImageInputStream执行StreamFinalizer()方法，其中实现了finalize()：
+从图中可以看到，虽然少，但还是有内存泄漏，看起来是finalize()的内存泄漏。继续在jdk的javax.imageio中查找finalize的踪影，发现com.sun.imageio.stream.StreamFinalizer()会对ImageInputStream执行StreamFinalizer()方法，其中实现了finalize()：
 <pre><code>public class StreamFinalizer {
     private ImageInputStream stream;
 
@@ -206,7 +206,8 @@ Byte[] 占用的heap最大。而从代码逻辑来看，私信附件的读入读
 }</code></pre>
 对该方法长长的注释说明：<br />
 Image{Input,Output}Stream（接口）如果被实现，在实现类构造时会构造StreamFinalizer，Image{Input,Output}Stream和StreamFinalizer彼此保留对方的应用，如果双方不可达，就会调用StreamFinalizer.finalize()，以便在特殊情况下在GC回收之前释放Image{Input,Output}Stream。当然，Image{Input,Output}Stream的实现类也保留了finalize()方法的实现（置空），通过GC来回收，保证一般情况下的性能问题。<br />
-在reSizeImage()方法中，我们new了ByteArray{Input,Output}Stream，从上面堆栈的信息可以看出，通过net.coobird.thumbnailator包中的Thumbnailator.createThumbnail()方法将其重新封装为Image{Input,Output}Stream的子类FileCacheImage{Input,Output}Stream或FileImage{Input,Output}Stream，由于我们没有主动close(ByteArray{Input,Output}Stream)，导致FileCacheImage{Input,Output}Stream或FileImage{Input,Output}Stream不能手动释放，StreamFinalizer.finalize()方法也不能触发。而FileCacheImage{Input,Output}Stream或FileImage{Input,Output}Stream自己保留的finalize()执行优先级比较低，平常负载不重的情况下有机会被调用，资源可以被释放，但负载高的时候finalize()被调用的几率会很少。综合这些情况，造成内存泄漏。<br />
+在reSizeImage()方法中，我们new了ByteArray{Input,Output}Stream，从上面堆栈的信息可以看出，通过net.coobird.thumbnailator包中的Thumbnailator.createThumbnail()方法将其重新封装为Image{Input,Output}Stream的子类FileImage{Input,Output}Stream，正常情况下，ByteArray{Input,Output}Stream不需要close()，交给GC回收相关资源即可，在JDK的实现中close()也是空的，但是在这里，由于ByteArray{Input,Output}Stream使用多态机制通过{Input,Output}Stream传入，并被封装为FileImage{Input,Output}Stream，为了让FileImage{Input,Output}Stream尽快释放，最好主动close(ByteArray{Input,Output}Stream)，否则在负载重的情况下，如果GC不及时或失败，会导致内存泄漏，吃掉可用内存。<br />
+由于ByteArray{Input,Output}Stream的Close()实现被JDK置空了，我们需要借助IOUtil的close()方法手动释放资源。
 <p class="inner_title">readImage()</p>
 相关堆栈：
 <pre><code>at com.sun.imageio.plugins.jpeg.JPEGImageReader.readImage(Native Method)
