@@ -1,0 +1,157 @@
+http://linux-ha.org/GettingStarted#configuringharesources
+<!DOCTYPE html>
+<html>
+<head> 
+  <meta charset="utf-8" /> 
+  <meta http-equiv="X-UA-Compatible" content="chrome=1" /> 
+  <link rel="stylesheet" type="text/css" href="../../stylesheets/stylesheet.css" media="screen" /> 
+  <link rel="stylesheet" type="text/css" href="../../stylesheets/pygment_trac.css" media="screen" /> 
+  <link rel="stylesheet" type="text/css" href="../../stylesheets/print.css" media="print" /> 
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]--> 
+    <title>Heartbeat v3 配置和资源运维</title> 
+  </head> 
+  <body> 
+    <div id="container"> 
+     <div class="inner"> 
+      <header> 
+       <h1><a style="color:#000" href="http://smartmz.github.io/" target="_blank">SmartMZ的Block</a></h1> 
+       <h2>积累</h2> 
+     </header> 
+     <hr /> 
+     <section id="main_content"> 
+       <h3>【TFS】Heartbeat v3 配置和资源运维</h3> 
+       <p>Heartbeat v3资源配置的一些细节</p> 
+       <hr /> 
+       <p>Heartbeat一共经历了v1 v2 v3等主要版本的变迁。</p>
+       <ul> 
+         <li>heartbeat v1：包含底层心跳、CRM资源管理等功能，通过haresources配置文件进行配置。haresources配置方案也叫1.x CRM-style配置，支持两个节点。</li> 
+         <li>heartbeat v2：将功能分割独立进程。CRM资源管理部分分为客户端crm和服务端crmd，各个节点都运行服务进程，默认端口为5566，使用crm命令进行配置，资源配置仍然使用haresources方案。</li> 
+         <li>heartbeat v3：按照业务功能分割为多个项目，heartbeart+Pacemaker+Cluster Glue+Resource Agents，其中heartbeat用于底层心跳信息传递；Pacemaker负责CRM资源管理，不仅可以和heartbeat工作，也可以和corosync一起工作；Cluster-Glue相当于中间层，将heartbeat（或corosync）和Pacemaker联系起来，包含LRM和STONITH；LRM调用Resource Agents实现各种资源启动、停止、监控等，Resource Agents指各种资源的LSB/OCF/STONITH配置和脚本，脚本必须能够接受参数{start|stop|restart|status}；LSB是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本，也就是和haresources对应的2.x CRM-style配置，支持两个以上节点的资源，STONITH使用电源交换机连接到健康服务器的电源设备自动重启失效服务器。</li>
+       </ul> 
+
+       <p>Heartbeat v3是本次使用的主要版本，只使用heartbeat可以在机器级别对集群节点进行监控，如果其中一个节点（机器）宕机（或网络中断），可以做出响应；如果需要进一步对集群节点的资源（服务、程序等）进行监控，要使用CRM模式实现资源管理。</p>
+       <p>本次Heartbeat v3的安装主要依赖YUM源安装，重点介绍heartbeat的配置、CRM资源配置的相关内容和资源运维的一些工具。</p>
+       <p>使用的软件版本为：</p>
+       <ul>
+         <li>CentOS release 5.10 (Final)</li>
+         <li>heartbeat-3.0.3-2.3.el5</li>
+         <li>heartbeat-libs-3.0.3-2.3.el5</li>
+         <li>cluster-glue-1.0.6-1.6.el5</li>
+         <li>cluster-glue-libs-1.0.6-1.6.el5</li>
+         <li>resource-agents-1.0.4-1.1.el5</li>
+       </ul>
+       <p>建议阅读本文前请先阅读<a href="./Linux-HA概念总结.html">《Linux-HA概念总结》</a>一文。</p>
+       <p>涉及到的主要配置文件注释：</p>
+       <ul>
+         <li>heartbeat配置文件 —— /etc/ha.d/ha.cf
+           <table border="2px" cellpadding="3px" cellspacing="0px"> 
+            <tbody>
+             <tr> 
+              <th width="2%">参数</th> 
+              <th width="25%">默认值和可选值</th> 
+              <th width="55%">说明</th> 
+            </tr> 
+            <tr> 
+              <td>debug</td> 
+              <td>1=开启；0=关闭（默认）</td> 
+              <td style="text-align: left">开启或关闭debug日志</td> 
+            </tr> 
+            <tr> 
+              <td>debugfile</td> 
+              <td>/var/log/ha-debug（默认）</td> 
+              <td style="text-align: left">debug文件路径，debug参数为1时有效。</td> 
+            </tr> 
+            <tr> 
+              <td>logfile</td> 
+              <td>/var/log/ha-log（默认）</td> 
+              <td style="text-align: left">日志文件路径。</td> 
+            </tr> 
+            <tr> 
+              <td>keepalive</td> 
+              <td>[0-9]* （默认：2）</td> 
+              <td style="text-align: left">心跳包发送间隔。单位默认为s，可以指定为ms、us，可以使用小数。</td> 
+            </tr> 
+            <tr> 
+              <td>warntime</td> 
+              <td>[0-9]* （默认：5）</td> 
+              <td style="text-align: left">等待心跳包的最长时间，超时报警。单位默认为s，可以指定为ms、us，可以使用小数。</td> 
+            </tr>
+            <tr> 
+              <td>deadtime</td> 
+              <td>[0-9]* （默认：30）</td> 
+              <td style="text-align: left">超时心跳检测失败，将对方标记为离线。单位默认为s，可以指定为ms、us，可以使用小数。</td> 
+            </tr>
+            <tr> 
+              <td>initdead</td> 
+              <td>[0-9]* </td> 
+              <td style="text-align: left">系统在启动时需要较长时间准备好网络通信，因此需要将启动到首次心跳发包的deadtime单独处理，该值即可实现。一般至少设置为deadtime×2。单位默认为s，可以指定为ms、us，可以使用小数。</td> 
+            </tr>
+            <tr> 
+              <td>auto_failback</td> 
+              <td>on=自动切回；<br/> off=不自动切回；<br /> legacy=兼容自动切回（默认）</td> 
+              <td style="text-align: left">资源主动迁移到倾向“主”节点，还是等服务节点宕机后再切换到另一个节点。默认的legacy为了兼容老的nice_failback参数，在所有节点不支持该参数时设置为自动切回。一般Active/Active（镜像）集群设置为on，Active/Passive集群设置为off。对2.x CRM-style资源CIB，该参数无效；在1.x CRM-style资源CIB中，该参数被default_resource_stickiness属性覆盖。</td> 
+            </tr> 
+            <tr> 
+              <td>node</td> 
+              <td>nodename1 nodename2 ...</td> 
+              <td style="text-align: left">集群中的节点，节点名来自于“uname -n”命令。</td> 
+            </tr> 
+            <tr> 
+              <td>autojoin </td> 
+              <td>none=不允许；any=允许任意；other=允许node参数指定值以外的</td> 
+              <td style="text-align: left">是否允许节点自动加入集群。设置为any时，node参数的设置无效，所有的节点存储在hostcache文件中。</td> 
+            </tr> 
+            <tr> 
+              <td>bcast</td> 
+              <td>网卡接口</td> 
+              <td style="text-align: left">发送集群内UDP广播的通信接口。端口由udpport参数指定。如果udpport在该参数之前设置，则使用udpport指定的端口，否则使用默认的694。</td> 
+            </tr>
+            <tr> 
+              <td>mcast</td> 
+              <td>格式：mcast 网卡接口 多路广播组 端口 子网穿透层数 0</td> 
+              <td style="text-align: left">心跳组播通信接口。D类多路广播组为224.0.0.0-239.255.255.255，一般为239.x.x.x；子网穿透层数1-255，1表示只在当前子网内传递。</td> 
+            </tr> 
+            <tr> 
+              <td>udpport</td> 
+              <td>端口号</td> 
+              <td style="text-align: left">指定发送集群内UDP广播的端口号。默认使用/etc/services文件中列出的ha-cluster的端口号，如果文件中没有，默认使用694. 该参数放置在bcast参数和mcast参数之前才会生效。</td> 
+            </tr> 
+            <tr> 
+              <td>compression</td> 
+              <td>zlib；bz2</td> 
+              <td style="text-align: left">消息体积比较大时的的压缩方法。不设置该参数不启用压缩。</td> 
+            </tr> 
+            <tr> 
+              <td>crm</td> 
+              <td>off=支持1.x-style；<br/>on=支持2.x-style；<br/>respawn=支持2.x-style</td> 
+              <td style="text-align: left">设置为on和respawn时，通过api访问节点资源的权限控制不同。</td> 
+            </tr> 
+          </tbody>
+        </table>
+        <br/>
+        <blockquote>更详细的说明参加官方说明：<a href="http://linux-ha.org/wiki/Ha.cf">http://linux-ha.org/wiki/Ha.cf</a></blockquote>
+      </li>
+      <li>Authkeys的配置
+        <p>该文件配置比较简单：</p>
+        <pre><code></code>auth 1
+1 sha1 sha1_any_password
+#2 sha1 sha1_any_password  
+#3 md5 md5_any_password </pre>
+        <p>第一行表示发送包签名使用下面的第1规则；第二行表示接收包可能的签名规则，1指第1规则，sha1指签名方法，还可以是md5、crc等，sha1和md5需要指定密钥，即sha1_any_password，集群中每个节点的该密钥必须相同。</p>
+        <blockquote>更详细的说明参加官方说明：<a href="http://linux-ha.org/wiki/Authkeys">http://linux-ha.org/wiki/Authkeys</a></blockquote>
+      </li>
+      <li>资源配置</li>
+      <p>1.x-CRM style对应的是haresources，官方文档：<a href="http://linux-ha.org/wiki/Haresources">http://linux-ha.org/wiki/Haresources</a>；2.x-CRM style对应的是Pacemacker的CIB，</p>
+    </ul>
+  </section> 
+  <footer>
+    This page was generated by 
+    <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by 
+    <a href="https://twitter.com/jasonlong">Jason Long</a>. 
+  </footer> 
+</div> 
+</div>   
+</body>
+</html>

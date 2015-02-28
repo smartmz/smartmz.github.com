@@ -86,7 +86,7 @@
            </ul>
          </li>
          <li>heartbeat
-           <p>heartbeat可以直接通过YUM源安装，也可以下载RPM或编译安装。相关安装和配置参见<a href="./Heartbeat v3安装.html">这里</a>。</p>
+           <p>heartbeat可以直接通过YUM源安装，也可以下载RPM或编译安装。Heartbeat v3安装过程中涉及到的配置文件说明参见<a href="./Heartbeat v3配置和资源运维.html">这里</a>。</p>
            <p>ha.cf的配置如下：</p>
            <pre><code># cat /etc/ha.d/ha.cf      
 debugfile /data1/tfs/nameServer/logs/ha-debug
@@ -342,7 +342,8 @@ Online: [ tc02402 tc28 ]
               <li>主备切换
                 <p>该HA模式下，如果主节点上的NameServer服务宕掉，HA会自动拉起另一个节点上的NameServer服务，并且将虚拟IP漂移到另一个节点上。这样就实现了资源级别的HA。</p>
                 <p>同上一模式需要注意的一样，服务已经迁移到备节点上后，如果备节点也宕掉，HA不会主动拉起主节点上的NameServer服务。要想HA能够自动重新拉起主节点上的服务，需要运行以下命令将主节点的错误标记清0：</p>
-                <pre><code># crm resource failcount tfs-name-server set tc28 0</code></pre>
+                <pre><code># crm resource failcount tfs-name-server show tc28
+# crm resource failcount tfs-name-server set tc28 0</code></pre>
                 <p>可以在crontab里添加一个脚本，定时清0节点上的错误标记。</p>
               </li>
             </ul>
