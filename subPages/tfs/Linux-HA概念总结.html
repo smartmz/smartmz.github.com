@@ -55,7 +55,7 @@
        <tr> 
         <td>CRM</td> 
         <td>董事长</td> 
-        <td style="text-align: left">Cluster Resources Manager，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控。</td> 
+        <td style="text-align: left">Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控。</td> 
        </tr> 
        <tr> 
         <td>LRM</td> 
@@ -73,7 +73,42 @@
         <td style="text-align: left">Cluster information base，集群信息库，每个节点上都保存一份集群的CIB。</td> 
        </tr> 
       </tbody>
+     </table>
+
+     <p>其他组件：</p> 
+     <table border="2px" cellpadding="3px" cellspacing="0px"> 
+      <tbody>
+       <tr> 
+        <th width="20%">部件</th> 
+        <th width="80%">含义</th> 
+       </tr> 
+        <tr> 
+        <td>haresource</td> 
+        <td style="text-align: left">集群资源管理器，v1.x、v2.x都包含，v2.x还提供了功能更强大的CRM/td> 
+       </tr> 
+       <tr> 
+        <td>ha-logd</td> 
+        <td style="text-align: left">集群时间日志服务</td> 
+       </tr> 
+       <tr> 
+        <td>CCM</td> 
+        <td style="text-align: left">Consensus Cluster Membership，集群成员一致性管理模块</td> 
+       </tr> 
+       <tr> 
+        <td>PE</td> 
+        <td style="text-align: left">Cluster Policy Engine，集群策略引擎</td> 
+       </tr> 
+       <tr> 
+        <td>TE</td> 
+        <td style="text-align: left">Cluster Transition Engine，策略执行引擎</td> 
+       </tr> 
+       <tr> 
+        <td>Stonith Daemon</td> 
+        <td style="text-align: left">使出现问题的节点从集群环境中脱离或重启</td> 
+       </tr> 
+      </tbody>
      </table> 
+
      <p align="center"> <img src="../images/5.png" /></p>
      <p class="pic_tip">图1 HA的集群事务决策模型</p> 
      <p>流程描述：</p> 
@@ -87,7 +122,11 @@
      <ul> 
       <li>Messaging Layer</li> 
       <ul> 
-       <li>heartbeat：Linux-HA开源项目发布的高可靠应用环境集群服务的核心软件，负责节点健康信息检测、可靠的节点间通讯和集群管理等工，经历了heartbeat v1（集成功能）；heartbear v2（基于进程拆分功能）；heartbear v3多个版本（基于项目拆分功能）。</li> 
+       <li>heartbeat：Linux-HA开源项目发布的高可靠应用环境集群服务的核心软件，负责节点健康信息检测、可靠的节点间通讯和集群管理等工，经历了heartbeat v1（集成功能）；heartbear v2（基于进程拆分功能）；heartbeat v3多个版本（基于项目拆分功能）。</li> 
+       	<ul>
+       		<li>heartbeat v1.x/v2.x组件：heartbeat、ha-logd、CCM、LRM、Stonith Daemon、CRM (haresource)、PE、TE</li>
+       		<li>heartbeat v3.x组件：heartbeat、Cluster Glue、Resource Agent、Pacemacker (CRM)</li>
+       	</ul>
        <li>corosync：OpenAIS发展衍生出来的开放性集群引擎工程。OpenAIS是基于SA Forum标准的集群框架的应用程序接口规范。SA Forum（服务可用性论坛）开发并发布应用接口规范AIS，用来定义应用程序接口的开放性规范的集合。</li> 
        <li>cman：Cluser Manger，RedHat对OpenAIS的另一种实现。</li> 
       </ul> 
