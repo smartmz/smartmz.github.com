@@ -328,7 +328,7 @@ redis-server --port 6380</code></pre>
 <p><code>redis&gt;SELECT 1</code></p>
 
 <blockquote>
-<p>从0开始的递增数字命名,自动选择0
+<p>从0开始的递增数字命名,自动选择0<br>
 Redis默认支持16个数据库，通过配置参数databases修改</p>
 </blockquote>
 
@@ -361,7 +361,7 @@ Redis默认支持16个数据库，通过配置参数databases修改</p>
 <p><code>PERSIST key</code></p>
 
 <blockquote>
-<p>使用SET、GETSET为键赋值也会同时清除键的生存时间
+<p>使用SET、GETSET为键赋值也会同时清除键的生存时间<br>
 其他只对键值进行操作的命令如INCR、LPUSH、HSET、ZREM等不会影响键的生存时间</p>
 </blockquote>
 
@@ -410,7 +410,7 @@ DECRBY key decrement  (int-decrement)</code></pre>
 <p><code>GETBIT key offset</code></p>
 
 <blockquote>
-<p>offset超出实际长度则默认位值是0
+<p>offset超出实际长度则默认位值是0<br>
 返回值是该位置的旧值</p>
 </blockquote>
 
@@ -419,7 +419,7 @@ DECRBY key decrement  (int-decrement)</code></pre>
 <p><code>SETBIT key offset value</code></p>
 
 <blockquote>
-<p>offset超过实际长度，中间的补0
+<p>offset超过实际长度，中间的补0<br>
 设置不存在的键的位，前面位补0</p>
 </blockquote>
 
@@ -446,7 +446,7 @@ HMGET key field [field …]
 HGETALL key</code></pre>
 
 <blockquote>
-<p>如果字段已经存在，将不执行
+<p>如果字段已经存在，将不执行<br>
 原子操作</p>
 </blockquote>
 
@@ -505,10 +505,10 @@ RPOP key</code></pre>
 <p><code>LRANGE key start stop</code></p>
 
 <blockquote>
-<p>列表起始索引为0
-返回片段包含start和stop处
-支持负索引，左右颠倒
-start&gt;stop，返回空列表。
+<p>列表起始索引为0<br>
+返回片段包含start和stop处<br>
+支持负索引，左右颠倒<br>
+start&gt;stop，返回空列表<br>
 stop&gt;实际索引范围，返回到列表最右边元素</p>
 </blockquote>
 
@@ -517,8 +517,8 @@ stop&gt;实际索引范围，返回到列表最右边元素</p>
 <p><code>LREM key count value</code></p>
 
 <blockquote>
-<p>count＞0，从左边开始删除前count个值为value的元素
-count＜0，从右边开始删除前count个值为value的元素
+<p>count＞0，从左边开始删除前count个值为value的元素<br>
+count＜0，从右边开始删除前count个值为value的元素<br>
 count=0，删除所有值为value的元素</p>
 </blockquote>
 
@@ -636,7 +636,7 @@ SUNIONSTORE destination key [key …]</code></pre>
 <p><code>ZADD key score member [score member …]</code></p>
 
 <blockquote>
-<p>已经存在则会用新的分数替换原有的分数
+<p>已经存在则会用新的分数替换原有的分数<br>
 分数支持整数、双精度浮点数、+inf、-inf</p>
 </blockquote>
 
@@ -650,11 +650,11 @@ SUNIONSTORE destination key [key …]</code></pre>
 ZREVRANGE key start stop [WITHSCORES]</code></pre>
 
 <blockquote>
-<p>包含start和stop处
-start|stop&lt;0，从后向前查找（-1表示最后一个元素）
-WITHSCORES表示同时获取分数
-时间复杂度为0(logn+m)（n为有序集合的基数，m为返回的元素个数）
-分数相同，按照字典顺序
+<p>包含start和stop处<br>
+start|stop&lt;0，从后向前查找（-1表示最后一个元素）<br>
+WITHSCORES表示同时获取分数<br>
+时间复杂度为0(logn+m)（n为有序集合的基数，m为返回的元素个数）<br>
+分数相同，按照字典顺序<br>
 排名从0开始</p>
 </blockquote>
 
@@ -663,8 +663,8 @@ WITHSCORES表示同时获取分数
 <p><code>ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]</code></p>
 
 <blockquote>
-<p>包含min和max处；希望不包含端点处，则用(min 或 max)
-min、max支持整数、双精度浮点数、+inf、-inf
+<p>包含min和max处；希望不包含端点处，则用(min 或 max)<br>
+min、max支持整数、双精度浮点数、+inf、-inf<br>
 LIMIT offset count 向后偏移offset个元素获取前count个</p>
 </blockquote>
 
@@ -710,10 +710,10 @@ ZREVRANK key member</code></pre>
 <p><code>ZINTERSTORE destination numkeys key [key …] [WEIGHTS weight [weight …]] [AGREGATE SUM|MIN|MAX]</code></p>
 
 <blockquote>
-<p>计算多个有序集合的交集并将结果存储在destination键中
-AGGREGATE=SUM(默认值），元素的分数是每个参与计算的集合中该元素分数的和
-AGGREGATE=MIN，元素的分数是每个参与计算的集合中该元素分数的最小值
-AGGREGATE=MAX，元素的分数是每个参与计算的集合中该元素分数的最大值
+<p>计算多个有序集合的交集并将结果存储在destination键中<br>
+AGGREGATE=SUM(默认值），元素的分数是每个参与计算的集合中该元素分数的和<br>
+AGGREGATE=MIN，元素的分数是每个参与计算的集合中该元素分数的最小值<br>
+AGGREGATE=MAX，元素的分数是每个参与计算的集合中该元素分数的最大值<br>
 WEIGHTS 每个集合在参与计算时元素的分数会被乘上该集合的权重</p>
 </blockquote>
 
@@ -730,7 +730,7 @@ WEIGHTS 每个集合在参与计算时元素的分数会被乘上该集合的权
 <p><code>SORT key</code></p>
 
 <blockquote>
-<p>忽略分数，对元素自身的值进行排序
+<p>忽略分数，对元素自身的值进行排序<br>
 非数字按字典排序</p>
 </blockquote>
 
@@ -741,7 +741,7 @@ Redis_Command * n
 EXEC</code></pre>
 
 <blockquote>
-<p>语法错误终止事务，运行错误调过错误命令继续运行
+<p>语法错误终止事务，运行错误调过错误命令继续运行<br>
 不支持回滚</p>
 </blockquote>
 

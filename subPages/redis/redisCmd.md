@@ -16,7 +16,7 @@ redis-server --port 6380
 
 #####多数据库选择数据库
 `redis>SELECT 1`
->从0开始的递增数字命名,自动选择0
+>从0开始的递增数字命名,自动选择0  
 >Redis默认支持16个数据库，通过配置参数databases修改
 
 #####获得Redis中所有的键
@@ -35,7 +35,7 @@ redis-server --port 6380
 
 #####恢复为永远不过期
 `PERSIST key`
->使用SET、GETSET为键赋值也会同时清除键的生存时间
+>使用SET、GETSET为键赋值也会同时清除键的生存时间  
 >其他只对键值进行操作的命令如INCR、LPUSH、HSET、ZREM等不会影响键的生存时间
 
 ###字符串类型
@@ -74,12 +74,12 @@ DECRBY key decrement  (int-decrement)
 
 #####位操作-获取某位
 `GETBIT key offset`
->offset超出实际长度则默认位值是0
+>offset超出实际长度则默认位值是0  
 >返回值是该位置的旧值
 
 #####位操作-设置某位
 `SETBIT key offset value`
->offset超过实际长度，中间的补0
+>offset超过实际长度，中间的补0  
 >设置不存在的键的位，前面位补0
 
 #####位操作-获得键中值是1的二进制位个数
@@ -99,7 +99,7 @@ HGET key field
 HMGET key field [field …]
 HGETALL key
 ```
->如果字段已经存在，将不执行
+>如果字段已经存在，将不执行  
 >原子操作
 
 `HMSET key field value [field value …]`
@@ -143,16 +143,16 @@ RPOP key
 
 #####获得列表片段
 `LRANGE key start stop`
->列表起始索引为0
->返回片段包含start和stop处
->支持负索引，左右颠倒
->start>stop，返回空列表。
+>列表起始索引为0  
+>返回片段包含start和stop处  
+>支持负索引，左右颠倒  
+>start>stop，返回空列表  
 >stop>实际索引范围，返回到列表最右边元素
 
 #####删除列表中指定的值
 `LREM key count value`
->count＞0，从左边开始删除前count个值为value的元素
->count＜0，从右边开始删除前count个值为value的元素
+>count＞0，从左边开始删除前count个值为value的元素  
+>count＜0，从右边开始删除前count个值为value的元素  
 >count=0，删除所有值为value的元素
 
 #####获得/设置指定索引的元素值
@@ -229,7 +229,7 @@ SUNIONSTORE destination key [key …]
 
 #####增加元素
 `ZADD key score member [score member …]`
->已经存在则会用新的分数替换原有的分数
+>已经存在则会用新的分数替换原有的分数  
 >分数支持整数、双精度浮点数、+inf、-inf
 
 #####获得元素的分数
@@ -240,17 +240,17 @@ SUNIONSTORE destination key [key …]
 ZRANGE key start stop [WITHSCORES]
 ZREVRANGE key start stop [WITHSCORES]
 ```
->包含start和stop处
->start|stop<0，从后向前查找（-1表示最后一个元素）
->WITHSCORES表示同时获取分数
->时间复杂度为0(logn+m)（n为有序集合的基数，m为返回的元素个数）
->分数相同，按照字典顺序
+>包含start和stop处  
+>start|stop<0，从后向前查找（-1表示最后一个元素）  
+>WITHSCORES表示同时获取分数  
+>时间复杂度为0(logn+m)（n为有序集合的基数，m为返回的元素个数）  
+>分数相同，按照字典顺序  
 >排名从0开始
 
 #####获得指定分数范围的元素
 `ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]`
->包含min和max处；希望不包含端点处，则用(min 或 max)
->min、max支持整数、双精度浮点数、+inf、-inf
+>包含min和max处；希望不包含端点处，则用(min 或 max)  
+>min、max支持整数、双精度浮点数、+inf、-inf  
 >LIMIT offset count 向后偏移offset个元素获取前count个
 
 #####增加某个元素的分数
@@ -279,10 +279,10 @@ ZREVRANK key member
 
 #####有序集合的交集
 `ZINTERSTORE destination numkeys key [key …] [WEIGHTS weight [weight …]] [AGREGATE SUM|MIN|MAX]`
->计算多个有序集合的交集并将结果存储在destination键中
->AGGREGATE=SUM(默认值），元素的分数是每个参与计算的集合中该元素分数的和
->AGGREGATE=MIN，元素的分数是每个参与计算的集合中该元素分数的最小值
->AGGREGATE=MAX，元素的分数是每个参与计算的集合中该元素分数的最大值
+>计算多个有序集合的交集并将结果存储在destination键中  
+>AGGREGATE=SUM(默认值），元素的分数是每个参与计算的集合中该元素分数的和  
+>AGGREGATE=MIN，元素的分数是每个参与计算的集合中该元素分数的最小值  
+>AGGREGATE=MAX，元素的分数是每个参与计算的集合中该元素分数的最大值  
 >WEIGHTS 每个集合在参与计算时元素的分数会被乘上该集合的权重
 
 #####有序集合的并集
@@ -291,7 +291,7 @@ ZREVRANK key member
 
 #####元素排序
 `SORT key`
->忽略分数，对元素自身的值进行排序
+>忽略分数，对元素自身的值进行排序  
 >非数字按字典排序
 
 ###事务
@@ -300,7 +300,7 @@ MULTI
 Redis_Command * n
 EXEC
 ```
->语法错误终止事务，运行错误调过错误命令继续运行
+>语法错误终止事务，运行错误调过错误命令继续运行  
 >不支持回滚
 
 `WATCH key`
