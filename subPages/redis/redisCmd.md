@@ -1,0 +1,307 @@
+###简单操作
+
+#####直接启动
+```
+redis-server
+redis-server --port 6380
+```
+#####停止Redis
+`redis-cli SHUTDOWN`
+
+#####发送命令
+`redis-cli -h 127.0.0.1 -p 6379`
+
+#####测试客户端与Redis的连接
+`redis-cli PING`
+
+#####多数据库选择数据库
+`redis>SELECT 1`
+>从0开始的递增数字命名,自动选择0
+>Redis默认支持16个数据库，通过配置参数databases修改
+
+#####获得Redis中所有的键
+`KEYS ＊`
+>遍历Redis中的所有键，多时会影响性能
+
+#####获得键值的数据类型
+`TYPE key`
+
+#####设置生存时间
+`EXPIRE key seconds`
+
+#####查询剩余生存时间
+`TTL key`
+>不存在返回1，未设置生存时间返回-1
+
+#####恢复为永远不过期
+`PERSIST key`
+>使用SET、GETSET为键赋值也会同时清除键的生存时间
+>其他只对键值进行操作的命令如INCR、LPUSH、HSET、ZREM等不会影响键的生存时间
+
+###字符串类型
+#####赋值与取值
+```
+GET key
+MGET key [key …]
+SET key value
+MSET key value [key value …]
+```
+#####键是否存在
+`EXISTS key`
+
+#####增加数字
+```
+INCR key （int+1）
+INCRBY key increment （int+increment）
+INCRBYFLOAT key increment （float+increment））
+```
+>键不存在时会默认键值为0
+
+#####减少数字
+```
+DECR key  (int-1)
+DECRBY key decrement  (int-decrement)
+```
+
+#####删除一个或多个键
+`DEL key [key …]`
+
+#####向尾部追加
+`APPEND key value`
+
+#####字符串长度
+`STRLEN key`
+
+#####位操作-获取某位
+`GETBIT key offset`
+>offset超出实际长度则默认位值是0
+>返回值是该位置的旧值
+
+#####位操作-设置某位
+`SETBIT key offset value`
+>offset超过实际长度，中间的补0
+>设置不存在的键的位，前面位补0
+
+#####位操作-获得键中值是1的二进制位个数
+`BITCOUNT key [start] [end]`
+
+#####位操作-位运算
+`BITOP operation destkey key [key …]`
+>支持AND、OR、XOR 和NOT
+
+###散列类型
+
+#####赋值与取值
+```
+HSET key field value
+HSETNX key field value
+HGET key field
+HMGET key field [field …]
+HGETALL key
+```
+>如果字段已经存在，将不执行
+>原子操作
+
+`HMSET key field value [field value …]`
+
+#####获取全部字段名
+`HKEYS key`
+
+#####获取全部字段值
+`HVALS key`
+
+#####判断存在
+`HEXISTS key field`
+
+#####增加数字
+`HINCRBY key field increment`
+
+#####删除一个或多个
+`HDEL key field [field …]`
+
+#####字段数量
+`HLEN key`
+
+#####元素排序
+`SORT key [BY 键名-＞字段名]`
+>非数字按字典排序
+
+###列表类型
+
+#####向列表两端增加元素
+```
+LPUSH key value [value …]
+RPUSH key value [value …]
+```
+#####从列表两端弹出元素
+```
+LPOP key
+RPOP key
+```
+#####获取元素的个数
+`LLEN key`
+
+#####获得列表片段
+`LRANGE key start stop`
+>列表起始索引为0
+>返回片段包含start和stop处
+>支持负索引，左右颠倒
+>start>stop，返回空列表。
+>stop>实际索引范围，返回到列表最右边元素
+
+#####删除列表中指定的值
+`LREM key count value`
+>count＞0，从左边开始删除前count个值为value的元素
+>count＜0，从右边开始删除前count个值为value的元素
+>count=0，删除所有值为value的元素
+
+#####获得/设置指定索引的元素值
+```
+LINDEX key index
+LSET key index value
+```
+>index<0，从右边开始计算的索引，最右边元素的索引是-1
+
+#####只保留列表指定片段
+`LTRIM key start end`
+>包含start和stop处
+
+#####插入元素
+`LINSERT key BEFORE|AFTER exsit_value value`
+
+#####元素从一个列表转到另一个列表
+`POPLPUSH source destination`
+>从source右边弹出一个元素，加入destination左边
+
+#####元素排序
+`SORT key`
+>非数字按字典排序
+
+###集合类型
+
+#####增加/删除元素
+`SADD key member [member …]`
+`SREM key member [member …]`
+
+#####获得集合中的所有元素
+`SMEMBERS key`
+
+#####判断元素是否在集合中
+`SISMEMBER key member`
+>复杂度为0(1)
+
+#####集合运算-差集
+```
+SDIFF key [key …]
+SDIFFSTORE destination key [key …]
+```
+>结果存储在destination键
+
+#####集合运算-交集
+```
+SINTER key [key …]
+SINTERSTORE destination key [key …]
+```
+>结果存储在destination键
+
+#####集合运算-并集
+```
+SUNION key [key …]
+SUNIONSTORE destination key [key …]
+```
+>结果存储在destination键
+
+#####获得集合中元素个数
+`SCARD key`
+
+#####随机获得集合中的count个元素
+`SRANDMEMBER key [count]`
+>先从桶中随机挑一个非空的桶，然后再从桶中随机选择一个元素
+
+#####从集合中弹出一个元素
+`SPOP key`
+
+#####元素排序
+`SORT key`
+>非数字按字典排序
+
+###有序集合类型
+
+#####增加元素
+`ZADD key score member [score member …]`
+>已经存在则会用新的分数替换原有的分数
+>分数支持整数、双精度浮点数、+inf、-inf
+
+#####获得元素的分数
+`ZSCORE key member`
+
+#####获得索引（排名）在某个范围的元素列表
+```
+ZRANGE key start stop [WITHSCORES]
+ZREVRANGE key start stop [WITHSCORES]
+```
+>包含start和stop处
+>start|stop<0，从后向前查找（-1表示最后一个元素）
+>WITHSCORES表示同时获取分数
+>时间复杂度为0(logn+m)（n为有序集合的基数，m为返回的元素个数）
+>分数相同，按照字典顺序
+>排名从0开始
+
+#####获得指定分数范围的元素
+`ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]`
+>包含min和max处；希望不包含端点处，则用(min 或 max)
+>min、max支持整数、双精度浮点数、+inf、-inf
+>LIMIT offset count 向后偏移offset个元素获取前count个
+
+#####增加某个元素的分数
+`ZINCRBY key increment member`
+
+#####获得集合中元素的数量
+`ZCARD key`
+
+#####获得指定分数范围內的元素个数
+`ZCOUNT key min max`
+>特性参考ZRANGEBYSCORE
+
+#####删除一个或多个元素
+`ZREM key member [member …]`
+
+#####按照索引（排名）在范围删除元素
+`ZREMRANGEBYRANK key start stop`
+>特性参考ZREVRANGE
+
+#####获得元素的索引（排名）
+```
+ZRANK key member
+ZREVRANK key member
+```
+>排名从0开始
+
+#####有序集合的交集
+`ZINTERSTORE destination numkeys key [key …] [WEIGHTS weight [weight …]] [AGREGATE SUM|MIN|MAX]`
+>计算多个有序集合的交集并将结果存储在destination键中
+>AGGREGATE=SUM(默认值），元素的分数是每个参与计算的集合中该元素分数的和
+>AGGREGATE=MIN，元素的分数是每个参与计算的集合中该元素分数的最小值
+>AGGREGATE=MAX，元素的分数是每个参与计算的集合中该元素分数的最大值
+>WEIGHTS 每个集合在参与计算时元素的分数会被乘上该集合的权重
+
+#####有序集合的并集
+`ZUNIONSTORE destination numkeys key [key …] [WEIGHTS weight [weight …]] [AGREGATE SUM|MIN|MAX]`
+>特性参考ZINTERSTORE
+
+#####元素排序
+`SORT key`
+>忽略分数，对元素自身的值进行排序
+>非数字按字典排序
+
+###事务
+```
+MULTI
+Redis_Command * n
+EXEC
+```
+>语法错误终止事务，运行错误调过错误命令继续运行
+>不支持回滚
+
+`WATCH key`
+>被监控的键值被修改后阻止之后事务的执行
