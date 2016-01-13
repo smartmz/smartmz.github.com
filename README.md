@@ -1,76 +1,26 @@
-#[9leg.com](http://9leg.com/)
+个人博客模板--基于Jekyll+Github构建。
+================
 
+####博客地址
+http://www.panxw.com, 支持PC与智能机访问。  
 
-###请使用自己申请的网站统计Id，评论Id等
+####使用本项目作为博客模板，仅需如下几步：
+1,首先Fork或Download一份本项目代码。  
+2,修改_config.yaml及about.md文件，以变更个人信息。  
+3,修改_include目录下相关文件，以配置网站统计(analytics.html)，网友评论(comment.html)，右侧栏目(categories.html)等。  
+4,修改CNAME文件，以绑定自己的域名。  
+5,删除_posts下文章，换成你自己的。  
+6,最后，push到你自己的博客Repo~  
 
-如今网络是开源的年代，茫茫多的框架。
+####本项目使用了
+1,CNZZ的网站统计服务，官网：http://cnzz.com  
+2,友言的网友评论服务，官网：http://www.uyan.cc  
+3,Google 的Adsense广告，官网：https://www.google.com/adsense/login/zh_CN  
+如需查看或管理网站统计、评论或广告，请自行注册帐号并修改_includes目录下相关文件。  
 
-既然我的博客放在gitHub上，也表示了开源，希望有更多的人来使用Jekyll模版。
+####联系作者
+QQ：85902258  
+邮箱：email(winfirm#163.com)  
+Github：https://github.com/panxw  
 
-但发现很多人Fork我的项目后，并不根据自己情况修改任何配置，而是直接写post了。
-
-这导致我的网站统计和评论带来了不必要的麻烦，简单的说就是，你网站中的评论被我管理，这不是你想要看到的吧。
-
-访问你网站的流量PV和UV等，算在我的统计范围内，这也不是你想要看到的吧(其实我很乐意的...)。
-
-那么就简单的说下，如何个性化自定义配置网站。
-
-**_config.yml**,网站的许多配置都在这个文件中，导航栏信息配置，网站作者信息配置，友链配置，评论和网站统计等。
-
-下面是我的配置：
-
-```
-googleAnaly:
-
-  config: false
-
-  id: Your-id-is-here
-```
-
-```
-baiduTongji:
-	
-  	config: true
-  	
-  	id: Your-id-is-here
-```
-
-```
-disqus:
-
-  config: false
-  
-  id: Your-id-is-here
-```
-
-```
-duoshuo:
-
-  config: true
-  
-  id: Your-id-is-here
-```
-
-```
-baiduShare:
-
-  config: true
-```
-可以使用google分析和baidu统计对网站进行流量多方面的信息跟踪查看，在这里使用了baidu统计，**注意：请设置你申请的统计Id**。
-
-在这里不使用google分析的原因是加载ga.js时间过长或者根本无法请求，原因你懂的。
-
-disqus和duoshuo都是网站评论设置，使用了多说，国内还是比较好的，**注意：请设置你申请的多说Id**。
-
-baiduShare是baidu分享插件，比较实用。
-
-最后根据自己的实际情况，修改_layouts下的两个模版html文件，稍微有点html知识都可以看懂并修改。
-
-
-##重复,请使用自己申请的网站统计Id，评论Id等。
-
-什么？怎么申请？google去...
-
-
-
-
+**^_^*随喜Star一下本项目吧，谢谢~  

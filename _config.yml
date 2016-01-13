@@ -1,121 +1,23 @@
-# Where things are
-source:       .
-destination:  ./_site
-plugins:      ./_plugins
-layouts:      ./_layouts
-paginate:     8
+markdown: redcarpet
+permalink: /:categories/:title.html
+url: 
+lsi: false
+pygments: true
+safe: true
+auto: false 
 
-# Handling Reading
-safe:         false
-include:      [".htaccess"]
-exclude:      []
-keep_files:   [".git", ".svn"]
-encoding:     "utf-8"
-markdown_ext: "markdown,mkdown,mkdn,mkd,md"
-textile_ext:  "textile"
+paginate: 8
+paginate_path: "page:num"
 
-# Filtering Content
-show_drafts:  null
-limit_posts:  0
-future:       true
-unpublished:  false
+# presonal config
+domain: http://smartmz.github.io
+title: SmartMZ的BLOG
+description: 积累
+author: SmartMZ
+email: miaoze612@gmail.com
+github: 
 
-# Conversion
-markdown:     kramdown
-highlighter:  pygments
-lsi:          false
-excerpt_separator: "\n\n"
-
-# Serving
-detach:       false
-port:         4000
-host:         127.0.0.1
-baseurl:      "" # does not include hostname
-
-# Outputting
-permalink:     date
-paginate_path: /page:num
-timezone:      null
-
-
-#Site config
-title: SmartMZ Blog
-description: 技术积累
-keywords: IT
-url: http://smartmz.github.io
-feed: /atom.xml
-favicon: /images/shortcut.jpg
-
-#Nav config
-nav:
-  - text: 首页
-    url: /index.html
-  - text: 分类目录 
-    url: /categories.html
-  - text: 文章归档
-    url: /archives.html
-
-#Author config
-author:
-    name: SmartMZ
-    email: miaoze612@gmail.com
-    imageLink: /images/header.jpg
-    simpleIntro: I Have a Dream
-
-#Follow me, you can choose your icon by http://fortawesome.github.io/Font-Awesome/icons/#brand
-follow:
-  - class: icon-rss
-    url: /atom.xml
-  - class: icon-weibo
-    url: http://weibo.com/
-  - class: icon-facebook
-    url: http://facebook.com/
-  - class: icon-github-alt
-    url: https://github.com/zJiaJun/
-  - class: icon-twitter
-    url: http://twitter.com/
-  - class: icon-google-plus
-    url: https://plus.google.com/116595571760191938657/about
-
-#Links
-customLinks:
-  - item:
-    - text: 技术小黑屋
-      url: http://droidyue.com/
-    message: Friends    
-  - item:
-    - text: Java Code Geeks
-      url: http://www.javacodegeeks.com/
-    - text: Web Developer
-      url: http://www.fromdev.com/
-    - text: BeginnersBook
-      url: http://beginnersbook.com/
-    - text: Mkyong
-      url: http://www.mkyong.com/
-    - text: Java By Nataraj
-      url: http://javabynataraj.blogspot.in/
-    message: About Java
-
-#googleAnaly, your id link UA-12345678-X
-googleAnaly:
-  config: false
-  id: UA-58146229-1
-
-#baidu tongji
-baiduTongji:
-  config: true
-  id: c12b560f0372d5995701449b9eac606c
-
-#comment config
-disqus:
-  config: false
-  id: piznblog
-
-duoshuo:
-  config: true
-  id: 9leg
-
-#baidu share config
-baiduShare:
-  config: true
-  
+config:
+  js_dir:
+  img_dir:
+  css_dir:
