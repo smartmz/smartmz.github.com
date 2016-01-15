@@ -6,25 +6,23 @@ category: "storage"
 tags: [ha]
 ---
 ###集群事务决策
-部件|比拟角色|含义
-----|---|---
-HA|公司|High Available，高可用。Linux-HA通过一组应用保证集群的高可用性。三方面内容：1 集群中各个节点之间可以相互感知；2 节点故障自动恢复；3 节点上的应用服务故障自动恢复
-Heartbeat|环境|Cluster Messaging Layer，心跳信息传递层。集群各节点相互感知和通信的基础环境。节点通过此能感知其他节点（或节点上的应用服务）是否存活。通过hearbeat可以在节点（机器）级别对集群中各个节点进行监控
-HA_aware|制度|集群事务决策，也叫策略引擎(Policy Engine)，根据底层的心跳信息，调用API进行集群事务决策，主要包括实现剔除无效节点，上线重新设置的节点，设置主节点、辅助节点，并且能够将底层信息传递给更上层。节点之间通过XML传递数据
-DC|协调员|Designated Coordinator，根据ha_aware从多个节点中选举出Leader。DC上运行了两个进程，决策引擎(PE)和事务引擎(TE)。
-CRM|董事长|Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控。
-LRM|经理|Local resources Manage，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。
+*部件* || *比拟角色* || *含义* 
+HA || 公司 || High Available，高可用。Linux-HA通过一组应用保证集群的高可用性。三方面内容：1 集群中各个节点之间可以相互感知；2 节点故障自动恢复；3 节点上的应用服务故障自动恢复
+Heartbeat || 环境 || Cluster Messaging Layer，心跳信息传递层。集群各节点相互感知和通信的基础环境。节点通过此能感知其他节点（或节点上的应用服务）是否存活。通过hearbeat可以在节点（机器）级别对集群中各个节点进行监控
+HA_aware || 制度 || 集群事务决策，也叫策略引擎(Policy Engine)，根据底层的心跳信息，调用API进行集群事务决策，主要包括实现剔除无效节点，上线重新设置的节点，设置主节点、辅助节点，并且能够将底层信息传递给更上层。节点之间通过XML传递数据
+DC || 协调员 || Designated Coordinator，根据ha_aware从多个节点中选举出Leader。DC上运行了两个进程，决策引擎(PE)和事务引擎(TE)。
+CRM || 董事长 || Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控。
+LRM || 经理 || Local resources Manage，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。
 RA|员工|Resource Agent，资源管理客户端，对某一个资源进行管理的工具，接收LRM的调度管理，对具体资源执行管理操作。
 CIB|数据库|Cluster information base，集群信息库，每个节点上都保存一份集群的CIB。
 ###其他涉及的组件
-名称|含义
----|---
-haresource|集群资源管理器，v1.x、v2.x都包含，v2.x还提供了功能更强大的CRM
-ha-logd|集群时间日志服务
-CCM|Consensus Cluster Membership，集群成员一致性管理模块
-PE|Cluster Policy Engine，集群策略引擎
-TE|Cluster Transition Engine，策略执行引擎
-Stonith-Daemon|使出现问题的节点从集群环境中脱离或重启
+*名称* || *含义*
+haresource || 集群资源管理器，v1.x、v2.x都包含，v2.x还提供了功能更强大的CRM
+ha-logd || 集群时间日志服务
+CCM || Consensus Cluster Membership，集群成员一致性管理模块
+PE || Cluster Policy Engine，集群策略引擎
+TE || Cluster Transition Engine，策略执行引擎
+Stonith-Daemon || 使出现问题的节点从集群环境中脱离或重启
 ###组件对应软件
 * Messaging Layer
 	* heartbeat：Linux-HA开源项目发布的高可靠应用环境集群服务的核心软件，负责节点健康信息检测、可靠的节点间通讯和集群管理等工，经历了heartbeat v1（集成功能）；heartbear v2（基于进程拆分功能）；heartbeat v3多个版本（基于项目拆分功能）。
@@ -40,8 +38,8 @@ Stonith-Daemon|使出现问题的节点从集群环境中脱离或重启
 	* RHCS：红帽集群套件，通过LVS（Linux Virtual Server）提供负载均衡集群，通过GFS文件系统提供存储集群功能。
 
 ###原理图
-![图1 HA的集群事务决策模型](http://ww3.sinaimg.cn/large/a8484315gw1f00mmfk00lj20i10fjad5.jpg)
-<center><font size=2>图1 HA的集群事务决策模型</font></center>
+<center>![图1 HA的集群事务决策模型](http://ww3.sinaimg.cn/large/a8484315gw1f00mmfk00lj20i10fjad5.jpg)
+<font size=2>图1 HA的集群事务决策模型</font></center>
 
 #####流程描述：
 * 在Messaging Layer层，各节点上部署支持Heartbeat信息交换的工具，通过广播交换心跳信息，并将所有信息聚合到CRM，由CRM统筹管理。心跳信息包含了服务器服务的运行状态信息等。
