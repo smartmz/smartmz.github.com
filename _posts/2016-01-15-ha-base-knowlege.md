@@ -1,5 +1,10 @@
-## Linux-HA基本原理
-
+---
+layout: post
+title: "[HA]Linux-HA基本原理"
+date: 2016-01-15 11:32
+category: "storage"
+tags: [ha]
+---
 ###集群事务决策
 部件|比拟角色|含义
 ----|---|---
