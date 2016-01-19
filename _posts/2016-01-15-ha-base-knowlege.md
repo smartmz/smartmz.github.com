@@ -6,21 +6,16 @@ category: "storage"
 tags: [ha]
 ---
 ###集群事务决策
-1  |  2  |  3
----|-----|-----
-x1 | x2  | x3
-safsdf
-
-部件 | 角色 | 含义
---- | --- | ---
-HA | 公司 | High Available，高可用。Linux-HA通过一组应用保证集群的高可用性。三方面内容：1 集群中各个节点之间可以相互感知；2 节点故障自动恢复；3 节点上的应用服务故障自动恢复
-Heartbeat | 环境 | Cluster Messaging Layer，心跳信息传递层。集群各节点相互感知和通信的基础环境。节点通过此能感知其他节点（或节点上的应用服务）是否存活。通过hearbeat可以在节点（机器）级别对集群中各个节点进行监控
-HA_aware | 制度 | 集群事务决策，也叫策略引擎(Policy Engine)，根据底层的心跳信息，调用API进行集群事务决策，主要包括实现剔除无效节点，上线重新设置的节点，设置主节点、辅助节点，并且能够将底层信息传递给更上层。节点之间通过XML传递数据
-DC | 协调员 | Designated Coordinator，根据ha_aware从多个节点中选举出Leader。DC上运行了两个进程，决策引擎(PE)和事务引擎(TE)。
-CRM | 董事长 | Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控。
-LRM | 经理 | Local resources Manage，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。
-RA | 员工 | Resource Agent，资源管理客户端，对某一个资源进行管理的工具，接收LRM的调度管理，对具体资源执行管理操作。
-CIB | 数据库 | Cluster information base，集群信息库，每个节点上都保存一份集群的CIB。
+| 部件 | 角色 | 含义 |
+| --- | --- | --- |
+| HA | 公司 | High Available，高可用。Linux-HA通过一组应用保证集群的高可用性。三方面内容：1 集群中各个节点之间可以相互感知；2 节点故障自动恢复；3 节点上的应用服务故障自动恢复 |
+| Heartbeat | 环境 | Cluster Messaging Layer，心跳信息传递层。集群各节点相互感知和通信的基础环境。节点通过此能感知其他节点（或节点上的应用服务）是否存活。通过hearbeat可以在节点（机器）级别对集群中各个节点进行监控 |
+| HA_aware | 制度 | 集群事务决策，也叫策略引擎(Policy Engine)，根据底层的心跳信息，调用API进行集群事务决策，主要包括实现剔除无效节点，上线重新设置的节点，设置主节点、辅助节点，并且能够将底层信息传递给更上层。节点之间通过XML传递数据 |
+| DC | 协调员 | Designated Coordinator，根据ha_aware从多个节点中选举出Leader。DC上运行了两个进程，决策引擎(PE)和事务引擎(TE) |
+| CRM | 董事长 | Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控 |
+| LRM | 经理 | Local resources Manage，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控 |
+| RA | 员工 | Resource Agent，资源管理客户端，对某一个资源进行管理的工具，接收LRM的调度管理，对具体资源执行管理操作 |
+| CIB | 数据库 | Cluster information base，集群信息库，每个节点上都保存一份集群的CIB |
 ###其他涉及的组件
 名称 | 含义
 --- | ---
