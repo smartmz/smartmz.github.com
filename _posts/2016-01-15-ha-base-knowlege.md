@@ -1,9 +1,13 @@
 ---
 layout: post
 title: "[HA]Linux-HA基本原理"
-date: 2016-01-15 11:32
-category: "storage"
+date: 2016-01-14 00:18
+keywords: redis,command
+description: Redis命令
+categories: [Storage]
 tags: [ha]
+group: archive
+icon: globe
 ---
 ###集群事务决策
 
