@@ -3,7 +3,7 @@ layout: post
 title: "[HA]Linux-HA基本原理"
 date: 2016-01-15 11:18
 keywords: redis,command
-description: Redis命令
+description: HA基本原理
 categories: [Storage]
 tags: [ha]
 group: archive
