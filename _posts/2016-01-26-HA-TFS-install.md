@@ -11,6 +11,9 @@ icon: globe
 ---
 　　淘宝的TFS可以选择使用HA搭建，增强集群的高可用性。在这里HA主要体现在NameServer节点的主备搭建。HA还支持其他模式的高可用架构，本文通过TFS高可用集群的搭建阐述主备模式。
 　　TFS的编译、安装和配置详情请参考[官方网站](http://code.taobao.org/p/tfs/wiki/index)。官方使用的Heartbeat是v3版本，在机器级别可以对节点进行监控，如果其中一个NS机器宕机（或网络中断）后可以做出响应；如果需要进一步对NS节点的资源（Nameserver服务）进行监控，要使用CRM模式实现资源管理。
+　　
+<!-- more -->
+
 　　Heartbeat v3已经将heartbeat、CRM拆分，heartbeat只负责心跳信息的通信，CRM部分主要有Pacemaker等实现资源管理，如果选择使用Pacemaker的话，还可以用CMAN来代替heartbeat. 因此，搭建TFS-HA集群时NS的主备部署有三种方式：
 
 * **NameServer×2 + heartbeat + DataServer×N，节点（机器）级别的HA**
