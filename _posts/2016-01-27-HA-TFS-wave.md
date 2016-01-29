@@ -18,7 +18,7 @@ icon: globe
 <center>![图1 NS检测脚本流程](http://ww2.sinaimg.cn/bmiddle/a8484315jw1f0btx2z2owj208o05k0sw.jpg)</center><br/><center><font size=2>图1 NS检测脚本流程</font></center>
 
 　　问题出在 **重启Heartbeat服务** 这一步。通过跟踪Heartbeat服务重启的过程可以找到原因，不过在此之前，先梳理一下当时两个NS之间的环境上下文。
-###背景和问题　　
+###场景和问题　　
 　　最开始线上TFS集群稳定的状态如下：
 　　
 <center>![图2 最初稳定状态](http://ww3.sinaimg.cn/bmiddle/a8484315jw1f0cz71d9amj20at06uaaf.jpg)</center><br/><center><font size=2>图2 最初稳定状态（NS-001为主NS，VIP落在该节点上）</font></center>
