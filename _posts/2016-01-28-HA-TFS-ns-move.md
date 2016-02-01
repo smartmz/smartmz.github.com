@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "[HA]TFS紧急复制引起NameServer切换问题"
+title: "TFS紧急复制引起NameServer切换问题"
 date: 2016-01-28 10:45
 keywords: ha,tfs
 description: HA基本原理
 categories: [Storage]
-tags: [ha]
+tags: [tfs]
 group: archive
 icon: globe
 ---
