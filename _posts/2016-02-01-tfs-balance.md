@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "TFS自动均衡机制"
-date: 2016-01-28 10:45
+date: 2016-02-01 18:00
 keywords: ha,tfs
 description: TFS自动均衡的策略
 categories: [Storage]
