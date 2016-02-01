@@ -191,5 +191,5 @@ uint32_t Func::get_lan(const uint64_t ipport, const uint32_t ipmask)
    return (adr->ip_ & ipmask);
 }
 ```
-其中的ipmask来自SYSPARAM_NAMESERVER.group_mask_，对应TFS配置的group_mask，因此通过修改该配置可以将网段放宽。
+其中的ipmask来自`SYSPARAM_NAMESERVER.group_mask_`，对应TFS配置的group_mask，因此通过修改该配置可以将网段放宽。
 
