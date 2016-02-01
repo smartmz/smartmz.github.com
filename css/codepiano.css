@@ -453,3 +453,8 @@ div.navbar-header > div.col-md-9 {
   border-color: #ddd #ddd #ddd transparent;
   *border-left-color: #ffffff;
 }
+
+.row {
+  margin-left: 0px;
+  margin-right: 0px;
+}
