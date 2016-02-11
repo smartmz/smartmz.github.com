@@ -57,7 +57,7 @@ html, body, div.wrapper {
 
 /* 自定义高亮样式 */
 .highlight pre,code {
-  font-size: 15px;
+  font-size: 13px;
   background-color: #002B36;
   color:#93A1A1;
 }
@@ -345,7 +345,7 @@ ul#post_info.tag_box a span {
   font-size: 0.8em; 
 }
 
-div.navbar-header > div.col-md-8 {
+div.navbar-header > div.col-md-9 {
     padding-left: 0px;
 }
 
@@ -452,4 +452,9 @@ div.navbar-header > div.col-md-8 {
 .tabs-right > .nav-tabs .active > a:focus {
   border-color: #ddd #ddd #ddd transparent;
   *border-left-color: #ffffff;
+}
+
+.row {
+  margin-left: 0px;
+  margin-right: 0px;
 }

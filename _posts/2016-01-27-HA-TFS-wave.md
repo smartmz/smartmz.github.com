@@ -23,7 +23,7 @@ icon: globe
 　　
 <center>![图2 最初稳定状态](http://ww3.sinaimg.cn/bmiddle/a8484315jw1f0cz71d9amj20at06uaaf.jpg)</center><br/><center><font size=2>图2 最初稳定状态（NS-001为主NS，VIP落在该节点上）</font></center>
 
-　　因为集群扩容4台机器共4*11个DS节点，过程中发现有一台机器一直无法被标记成迁移数据目标机，猜想可能是NS对该机器上DS的索引信息和负载信息有误，打算迁移一下NS节点重新获取DS信息。于是停止 NS进程-001 ，HA自动将服务迁移到 NS-002 节点；然后短时间内再停止 NS进程-002，HA自动将服务迁回到 NS-001 节点。这时集群的状态为：
+　　因为集群扩容4台机器共4*11个DS节点，过程中发现有一台机器一直无法被标记成迁移数据目标机，猜想可能是NS对该机器上DS的索引信息和负载信息有误，打算迁移一下NS节点重新获取DS信息(未迁移的原因实际上是TFS自动平衡策略导致的，详情可以参考[这篇文章](http://smartmz.github.io/2016/02/01/tfs-balance/))。于是停止 NS进程-001 ，HA自动将服务迁移到 NS-002 节点；然后短时间内再停止 NS进程-002，HA自动将服务迁回到 NS-001 节点。这时集群的状态为：
 　　
 <center>![图3 手动迁移服务后的集群状态](http://ww3.sinaimg.cn/bmiddle/a8484315jw1f0cz71c3u5j20b406y3yu.jpg)</center><br/><center><font size=2>图3 手动迁移服务后的集群状态（NS-001为主NS，VIP落在该节点上）</font></center>
 

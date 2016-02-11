@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "[HA]TFS高可用集群的搭建"
+title: "TFS高可用集群的搭建"
 date: 2016-01-21 11:44
 keywords: tfs,ha
 description: 利用HA搭建TFS高可用集群
 categories: [Storage]
-tags: [ha]
+tags: [tfs]
 group: archive
 icon: globe
 ---
