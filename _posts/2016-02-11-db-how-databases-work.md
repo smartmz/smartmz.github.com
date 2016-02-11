@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[DB]-转-关系型数据库的运行"
+title: "[DB]<转>关系型数据库的运行"
 date: 2016-02-11 11:12
 keywords: software
 description: 剖析关系型数据库的原理
@@ -9,6 +9,7 @@ tags: [db]
 group: archive
 icon: mail-forward
 ---
+
 > 原英文链接 [E文](http://coding-geek.com/how-databases-work/)
 > 原译文链接 [上文](http://geek.csdn.net/news/detail/52539) [下文](http://geek.csdn.net/news/detail/55149)
 
