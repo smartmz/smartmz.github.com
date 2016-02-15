@@ -59,7 +59,7 @@ NameServer|123.125.106.24 / tc02402 / eth0外部 / eth3心跳|备NS
 	* cluster-glue-libs-1.0.6-1.6.el5
 	* resource-agents-1.0.4-1.1.el5
 * heartbeat  
-　　可以直接通过YUM源安装，也可以下载RPM或编译安装。安装完成后需要配置ha.cf，路径默认在`/etc/ha/ha.cf`，主备节点除路径外配置相同。
+　　可以直接通过YUM源安装，也可以下载RPM或编译安装。安装完成后需要配置ha.cf，路径默认在`/etc/ha/ha.cf`，主备节点除路径外配置相同。   
 　　ha.cf的配置实例：
 
 	```sh
