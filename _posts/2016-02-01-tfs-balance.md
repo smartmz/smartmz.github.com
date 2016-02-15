@@ -10,7 +10,7 @@ group: archive
 icon: globe
 ---
 ###描述
-　　TFS集群支持平滑扩容，当加入新的节点后，NameServer会对DataServer上的Blocks进行均衡，使所有DataServers的容量尽早达到均衡。进行均衡计划时，首先通过计算将机器划分为两堆，一堆是超过平均数量的，作为移动源；一类是低于平均数量的，作为移动目标。
+　　TFS集群支持平滑扩容，当加入新的节点后，NameServer会对DataServer上的Blocks进行均衡，使所有DataServers的容量尽早达到均衡。进行均衡计划时，首先通过计算将机器划分为两堆，一堆是超过平均数量的，作为移动源；一类是低于平均数量的，作为移动目标。  
 　　移动目标的选择基于以下策略：首先一个block的移动的源和目的，应该保持在同一网段内；在作为目标的一定机器内，优先选择同机器的源到目标之间移动。
 
 <!-- more -->
@@ -181,7 +181,7 @@ bool elect_move_dest_ds(const std::set<ServerCollect*>& targets, const vector<Se
 }
 ```
 ###问题
-　　从代码的逻辑来看，如果扩容时，上了不同网段的DS，新的DS是无法正常被选为目标迁移DS的。但是向集群写数据、复制或紧急复制任务的情况下，新的DS会被优先选为目标DS接收数据。
+　　从代码的逻辑来看，如果扩容时，上了不同网段的DS，新的DS是无法正常被选为目标迁移DS的。但是向集群写数据、复制或紧急复制任务的情况下，新的DS会被优先选为目标DS接收数据。  
 　　计算网段的逻辑如下：
 
 ```c++
@@ -191,5 +191,5 @@ uint32_t Func::get_lan(const uint64_t ipport, const uint32_t ipmask)
    return (adr->ip_ & ipmask);
 }
 ```
-其中的ipmask来自`SYSPARAM_NAMESERVER.group_mask_`，对应TFS配置的group_mask，因此通过修改该配置可以将网段放宽。
+　　其中的ipmask来自`SYSPARAM_NAMESERVER.group_mask_`，对应TFS配置的group_mask，因此通过修改该配置可以将网段放宽。
 
