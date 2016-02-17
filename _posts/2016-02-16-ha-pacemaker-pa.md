@@ -57,7 +57,7 @@ icon: globe
 * **[cib](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch03.html#_cib_properties)** CIB配置文件根节点   
 	* **configuration** 集群配置信息的根节点   
 		* **crm_config** 集群全局配置   
-			* **[cluster_property_set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_cluster_options.html)** 属性配置   
+			* **[cluster-property_set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_cluster_options.html)** 属性配置   
 		* **[nodes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch04.html)** 集群各个节点的配置   
 			* **[instance_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-node-attributes.html)** Node参数配置   
 		* **[resources](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch05.html)** 集群要提供的服务（资源），TFS集群搭建HA使用OpenClusterFramework（OCF）资源   
