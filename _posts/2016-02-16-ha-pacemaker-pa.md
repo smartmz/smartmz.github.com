@@ -53,25 +53,25 @@ icon: globe
   <status/>
 </cib>
 ```
-* **[cib](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch03.html#_cib_properties)** CIB配置文件根节点
-	* **configuration** 集群配置信息的根节点
-		* **crm_config** 集群全局配置
-			* **[cluster_property_set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_cluster_options.html)** 属性配置
-		* **[nodes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch04.html)** 集群各个节点的配置
-			* **[instance_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-node-attributes.html)** Node参数配置
-		* **[resources](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch05.html)** 集群要提供的服务（资源），TFS集群搭建HA使用OpenClusterFramework（OCF）资源
-			* **[group](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch10.html#group-resources)** 可选，将多个资源合并为一组，同时执行操作
-				+ **[primitive](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/primitive-resource.html)** 配置资源及其属性，包括资源的分数（Score）
-					+ **[instance_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_instance_attributes.html)** PA所需参数配置，通过`crm ra meta PA_XXX`命令查询
-					+ **[meta_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-options.html#_resource_meta_attributes)** 配置资源的属性
-					+ **[operations](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_operations.html)** 操作配置，操作必须是PA支持的操作
-		* **constraints** 资源在不同节点上的切换规则
-			* **[rsc_location](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_deciding_which_nodes_a_resource_can_run_on.html#_location_properties)** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级
- 				+ **[rule](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch08.html)** 直接使用rsc_loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_resource_options.html)，还可以[应用于meta_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_cluster_options.html)
-			* **[rsc_order](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-ordering.html#_ordering_properties)** 可选，确定多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式
-			* **[rsc_colocation](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-colocation.html#_colocation_properties)** 可选，确定多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)的方式完成更多的依赖方式
-		* **rsc_defaults** 全局资源默认配置。如果在<resources/>中对资源进行了配置，以<resources/>中的为准，否则以这里配置的为准
-	* **status** 集群每个节点的历史资源。集群根据该节点的内容构建完整的状态。注意该节点主要由LRMd在内存中操作，不会存盘，也不需要人为编辑，使用`#cibadmin --query|-Q`命令可以查看该节点的内容。
+» **[cib](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch03.html#_cib_properties)** CIB配置文件根节点
+» » **configuration** 集群配置信息的根节点
+» » » **crm_config** 集群全局配置
+» » » » **[cluster_property_set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_cluster_options.html)** 属性配置
+» » » **[nodes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch04.html)** 集群各个节点的配置
+» » » » **[instance_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-node-attributes.html)** Node参数配置
+» » » **[resources](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch05.html)** 集群要提供的服务（资源），TFS集群搭建HA使用OpenClusterFramework（OCF）资源
+» » » » **[group](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch10.html#group-resources)** 可选，将多个资源合并为一组，同时执行操作
+» » » » » **[primitive](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/primitive-resource.html)** 配置资源及其属性，包括资源的分数（Score）
+» » » » » » **[instance_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_instance_attributes.html)** PA所需参数配置，通过`crm ra meta PA_XXX`命令查询
+» » » » » » **[meta_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-options.html#_resource_meta_attributes)** 配置资源的属性
+» » » » » » **[operations](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_operations.html)** 操作配置，操作必须是PA支持的操作
+» » **constraints** 资源在不同节点上的切换规则
+» » » **[rsc_location](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_deciding_which_nodes_a_resource_can_run_on.html#_location_properties)** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级
+» » » »  **[rule](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch08.html)** 直接使用rsc_loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_resource_options.html)，还可以[应用于meta_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_cluster_options.html)
+» » » »  **[rsc_order](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-ordering.html#_ordering_properties)** 可选，确定多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式
+» » » »  **[rsc_colocation](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-colocation.html#_colocation_properties)** 可选，确定多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)的方式完成更多的依赖方式
+» »  **rsc_defaults** 全局资源默认配置。如果在<resources/>中对资源进行了配置，以<resources/>中的为准，否则以这里配置的为准
+» »  **status** 集群每个节点的历史资源。集群根据该节点的内容构建完整的状态。注意该节点主要由LRMd在内存中操作，不会存盘，也不需要人为编辑，使用`#cibadmin --query|-Q`命令可以查看该节点的内容。
 
 > 有关资源分数和节点分数的内容，请参考()[]。
 
