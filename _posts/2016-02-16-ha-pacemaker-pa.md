@@ -72,7 +72,7 @@ icon: globe
 			* **[rsc_order](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-ordering.html#_ordering_properties)** 可选，确定多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式   
 			* **[rsc_colocation](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-colocation.html#_colocation_properties)** 可选，确定多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)的方式完成更多的依赖方式   
 		* **rsc_defaults** 全局资源默认配置。如果在<resources/>中对资源进行了配置，以<resources/>中的为准，否则以这里配置的为准   
-		* **status** 集群每个节点的历史资源。集群根据该节点的内容构建完整的状态。注意该节点主要由LRMd在内存中操作，不会存盘，也不需要人为编辑，使用`#cibadmin --query|-Q`命令可以查看该节点的内容。   
+	* **status** 集群每个节点的历史资源。集群根据该节点的内容构建完整的状态。注意该节点主要由LRMd在内存中操作，不会存盘，也不需要人为编辑，使用`#cibadmin --query|-Q`命令可以查看该节点的内容。   
 
 > 有关资源分数和节点分数的内容，请参考()[]。
 
