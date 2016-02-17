@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "[HA]Pacemaker的资源执行(PA)"
+title: "[HA]Pacemaker的资源调度配置(PA配置)"
 date: 2016-02-16 16:42
 keywords: tfs,ha
 description: Heartbeat v3资源管理层的重点
 categories: [Storage]
-tags: [ha]
+tags: [ha, pacemaker]
 group: archive
 icon: globe
 ---
 　　高可用HA模型里的LRM，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。   
-　　这里涉及到两方面，一是资源配置，二是根据资源配置和LRM的调度对资源进行调度。对应到具体的实现上，第一部分内容就是Pacemaker的资源管理——CIB，第二部分就是Pacemaker的资源调度——PA。第二部分参见[《[HA]Pacemaker定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第一部分。  
+　　这里涉及到两方面，一是资源本身，二是根据资源和LRM的调度指令对资源实现调度。对应到具体的实现上，第一部分内容就是Pacemaker的资源——CIB，第二部分就是Pacemaker的资源调度——PA。。第一部分参见[《[HA]Pacemaker定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第二部分资源调度如何配置。  
 
 <!-- more -->
  
@@ -32,8 +32,11 @@ icon: globe
 　　CIB使用xml配置集群和当前集群中的所有资源，会在节点之间自动同步。PE通过CIB决策集群如何达到最佳状态（选出master）。  
 　　master选举逻辑根据PE的决策指令在所有的节点中选择一个节点（CRMd）作为master，如果该节点的CRMd出错，会再选择一个。这个选举逻辑官方叫做 DC(Designated Controller)。具体的过程是：  
 　　DC将PE的决策指令按照指定的优先级顺序传递给本节点的LRMd、通过CRMd传递给其他节点的LRMd，同时确定一个希望的（expected）master. 各个节点的LRMd调用TE执行具体的决策指令选出各自认为的master，将结果回传给DC，DC根据之前希望的master和其他节点已经回传的执行结果确定是继续等待优先级高的节点的结果，还是终断本次选举并通知PE再进行一轮选举。   
-　　在一些情况下，为了保护共享数据或者完成数据恢复，DC可能决策某节点需要脱离集群，这需要STONITHd协助完成。  
-　　[《[HA]Linux-HA基本原理》](http://smartmz.github.io/2016/01/15/ha-base-knowlege)中提到的几种集群形式Pacemaker都可以支持，在TFS集群的搭建过程中主要使用主备模式。
+　　在一些情况下，为了保护共享数据或者完成数据恢复，DC可能决策某节点需要脱离集群，这需要STONITHd协助完成。    
+　　在整个过程中重点需要搞清楚的有两点：CIB怎么配置，这是本文的重点；DC过程如何选择master，可以参考[《[HA]Pacemaker的分数机制》](http://smartmz.github.io/2016/02/17/ha-pacemaker-score)    
+###Pacemaker支持的集群模式
+　　[《[HA]Linux-HA基本原理》](http://smartmz.github.io/2016/01/15/ha-base-knowlege)中提到的几种集群形式Pacemaker都可以支持，在TFS集群的搭建过程中主要使用主备模式，也是相关系列文章关注的模式。    
+　　Pacemaker官方介绍了其他的模式，可以参考[这里](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_types_of_pacemaker_clusters.html)和[这里](http://clusterlabs.org/wiki/Main_Page)。
 ###CIB配置
 　　CIB描述了集群全部信息供DC使用。
 ####CIB内容
@@ -128,7 +131,7 @@ icon: globe
 						<nvpair id="tfs-name-server-instance_attributes-user" name="user" value="root"/>
 					</instance_attributes>
 					<meta_attributes id="tfs-name-server-meta_attributes">
-						<!--设置集群中节点资源的允许状态为 允许运行 的；设定资源启动成功的初始分数为 正无穷；设定失败后丢分 负无穷-->
+						<!--设置集群中节点资源的允许状态为 允许运行 的；设定资源启动成功的初始分数为 正无穷；设定失败后设为 负无穷-->
 						<nvpair id="tfs-name-server-meta_attributes-target-role" name="target-role" value="Started"/>
 						<nvpair id="tfs-name-server-meta_attributes-resource-stickiness" name="resource-stickiness" value="INFINITY"/>
 						<nvpair id="tfs-name-server-meta_attributes-resource-failure-stickiness" name="resource-failure-stickiness" value="-INFINITY"/>
@@ -208,4 +211,55 @@ cibadmin --delete|-D --crm_xml '{XML_Tag}'
 ```
 > 官方提供了沙箱操作来测试更新后的CIB，可以参考[Making Configuration Changes in a Sandbox](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-config-sandboxes.html)，文中不再详述。
 
+####CRM shell
+　　启动Pacemaker服务后，更新CIB配置即可让集群运转起来。这里介绍一个工具 crmsh，该工具可以查看当前集群中的资源运行情况，包括查看目前资源的master节点，配置是否正确，集群系统支持的资源类型等，当然也可以对CIB资源进行直接操作配置。
+　　从pacemaker 1.1.8开始，Crmsh发展成一个独立项目，pacemaker中不再提供，[官方网站](https://savannah.nongnu.org/forum/forum.php?forum_id=7672)提供下载。下载RPM包结合yum解决依赖安装完成。
+　　在终端直接输入`crm`就进入CRM Shell控制台。按两下`TAB`键提示当前支持的命令，`help`可以查看帮助信息，`help CMD`可以查看具体命令的帮助信息。
+#####查看配置
+```sh
+# crm
+crm(live)#
+crm(live)# configure
+crm(live)configure# show
+node $id="3b8aa51e-88c4-4e3a-8fdb-2311ca791307" tc102
+node $id="9b08998a-46c9-43f8-b0a9-18c7cb3acf5f" tc101
+primitive ip-alias ocf:heartbeat:IPaddr2 \
+	params ip="10.73.14.105" nic="eth1:1" \
+	op monitor interval="2s" \
+	meta target-role="Started"
+primitive tfs-name-server ocf:heartbeat:NameServer \
+	params basedir="/data0/tfs" nsip="localhost" nsport="10000" user="root" \
+	op monitor interval="2s" \
+	op start interval="0s" timeout="30s" \
+	op stop interval="0s" timeout="30s" \
+	meta target-role="Started" resource-stickiness="INFINITY" resource-failure-stickiness="-INFINITY"
+group ns-group ip-alias tfs-name-server
+property $id="cib-bootstrap-options" \
+	dc-version="1.0.12-unknown" \
+	cluster-infrastructure="Heartbeat" \
+	symmetric-cluster="true" \
+	no-quorum-policy="ignore" \
+	stonith-enabled="0"
+rsc_defaults $id="rsc_defaults-options" \
+	resource-stickiness="100"
+``` 
+　　结果展示了CIB配置，比起Xml更加简洁明了。
+#####检查配置
+```sh
+接上
+crm(live)configure# verify
+ERROR: tfs-name-server: attribute resource-failure-stickiness does not exist
+WARNING: tfs-name-server: specified timeout 30s for start is smaller than the advised 90
+WARNING: tfs-name-server: specified timeout 30s for stop is smaller than the advised 180
+crm(live)configure#
+```
+　　提示我们tfs-name-server资源没有`resource-failure-stickiness`属性。这是因为在Pacemaker 1.0以后，`resource-failure-stickiness`属性被`migration-threshold`属性替代了。
+#####修改配置
+```sh
+接上
+crm(live)configure# edit
+```
+　　进入vim编辑模式，编辑内容为之前crm show的内容，而不是xml内容，将 `resource-failure-stickiness="-INFINITY"` 修改为 `migration-threshold="-INFINITY"`，保存退出。crm会自动检测编辑后的配置，如果还有ERROR，会询问是否继续编辑，如果选择否，之前的编辑不会应用。再次调用`verify`检查配置，已经没有ERROR提示了。
+
+　　Crm Shell其他的功能可以参考它的帮助文档。
 
