@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[HA]定制OCF资源"
+title: "[HA]Pacemaker定制OCF资源"
 date: 2016-01-21 12:18
 keywords: ha,ocf
 description: Pacemaker的OCF资源
@@ -9,7 +9,9 @@ tags: [ha]
 group: archive
 icon: globe
 ---
-　　Pacemaker 的资源主要有两类，LSB和OCF。
+　　高可用HA模型里的LRM，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。   
+　　这里涉及到两方面，一是资源配置，二是根据资源配置和LRM的调度对资源进行调度。对应到具体的实现上，第一部分内容就是Pacemaker的资源管理——CIB，第二部分就是Pacemaker的资源调度——PA。第一部分参见[《[HA]Pacemaker的资源执行(PA)》](http://smartmz.github.io/2016/02/17/ha-pacemaker-pa)，本文重点来说第二部分。   
+　　Pacemaker 支持的资源有Open Cluster Framework(OCF)、Linux Standard Base(LSB)、Systemd、Upstart、System Services、STONITH、Nagios Plugins等，但主要是两类，LSB和OCF。
 
 * LSB 指 Linux 标准服务，通常就是 /etc/init.d 目录下那些脚本。Pacemaker 可以用这些脚本来启停服务。查看LSB资源可以使用命令：  
 `# crm ra list lsb`

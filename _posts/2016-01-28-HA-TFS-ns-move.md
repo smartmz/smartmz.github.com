@@ -11,7 +11,7 @@ icon: globe
 ---
 ###描述
 　　TFS给HA提供的OCF资源中，监控NS服务是否可用逻辑不完善，导致在NS节点网络、负载较大时将NS服务标记为不可用，引起NameServer切换。
-　　有关HA-OCF资源的知识可以参考[这篇文章](http://smartmz.github.io/2016/01/21/ha-ocf/)，文章最后“附2 - TFS-HA OCF资源脚本实例”给出的例子就是本文主要涉及的TFS-OCF资源脚本。
+　　有关HA-OCF资源的知识可以参考[《[HA]Pacemaker定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf/)，文章最后“附2 - TFS-HA OCF资源脚本实例”给出的例子就是本文主要涉及的TFS-OCF资源脚本。
 
 <!-- more -->
 

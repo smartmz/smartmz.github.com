@@ -152,7 +152,7 @@ crm respawn			# 采用2.x style的CRM(Pacemaker)
 # cp -f $TFS_HOME/scripts/ha/NameServer /usr/lib/ocf/resource.d/heartbeat/
 # chmod u+x /usr/lib/ocf/resource.d/heartbeat/NameServer
 ```
-> OCF资源的编写 参考[《[HA]定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-ocf)
+> OCF资源的编写 参考[《[HA]Pacemaker的资源执行(PA)》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)
 
 ####启动heartbeat并配置资源
 ```sh
