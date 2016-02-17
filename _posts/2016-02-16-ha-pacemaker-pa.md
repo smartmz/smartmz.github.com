@@ -10,7 +10,10 @@ group: archive
 icon: globe
 ---
 　　高可用HA模型里的LRM，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。   
-　　这里涉及到两方面，一是资源配置，二是根据资源配置和LRM的调度对资源进行调度。对应到具体的实现上，第一部分内容就是Pacemaker的资源管理——CIB，第二部分就是Pacemaker的资源调度——PA。第二部分参见[《[HA]Pacemaker定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第一部分。   
+　　这里涉及到两方面，一是资源配置，二是根据资源配置和LRM的调度对资源进行调度。对应到具体的实现上，第一部分内容就是Pacemaker的资源管理——CIB，第二部分就是Pacemaker的资源调度——PA。第二部分参见[《[HA]Pacemaker定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第一部分。  
+
+<!-- more -->
+ 
 　　在Heartbeat v3中，CRM主要由分离项目Pacemaker承担资源管理工作。（Pacemaker的[官方网站](http://clusterlabs.org/wiki/Main_Page))   
 　　目前Pacemaker的版本1.1.14，2016年1月中旬发布，已经支持了CentOS7.包含的组件包括：
 
