@@ -62,13 +62,13 @@ icon: globe
 			* **[instance_attributes](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-node-attributes.html)** Node参数配置   
 		* **[resources](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch05.html)** 集群要提供的服务（资源），TFS集群搭建HA使用OpenClusterFramework（OCF）资源   
 			* **[group](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch10.html#group-resources)** 可选，将多个资源合并为一组，同时执行操作   
-				* **1**　配置资源及其属性，包括资源的分数（Score）
-				* **2**　PA所需参数配置，通过`crm ra meta PA_XXX`命令查询    
-				* **3**　配置资源的属性   
-				* **4**　操作配置，操作必须是PA支持的操作 
+				* **[primitive][primitive-link]**　配置资源及其属性，包括资源的分数（Score）
+				* **[instance_attributes][instance-attributes-link]**　PA所需参数配置，通过`crm ra meta PA_XXX`命令查询    
+				* **[meta_attributes][meta-attributes-link]**　配置资源的属性   
+				* **[operations][operations-link]**　操作配置，操作必须是PA支持的操作 
 		* **constraints** 资源在不同节点上的切换规则   
 			* **[rsc_location](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_deciding_which_nodes_a_resource_can_run_on.html#_location_properties)** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级   
-				* **5**　直接使用rsc-loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location][rule_location_link]，还可以[应用于meta_attributes][rule_meta_attributes_link]
+				* **[rule][rule-link]**　直接使用rsc-loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location][rule-location-link]，还可以[应用于meta_attributes][rule-meta-attributes-link]
 			* **[rsc_order](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-ordering.html#_ordering_properties)** 可选，确定多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式   
 			* **[rsc_colocation](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-colocation.html#_colocation_properties)** 可选，确定多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)的方式完成更多的依赖方式   
 		* **rsc_defaults** 全局资源默认配置。如果在<resources/>中对资源进行了配置，以<resources/>中的为准，否则以这里配置的为准   
@@ -263,12 +263,12 @@ crm(live)configure# edit
 　　进入vim编辑模式，编辑内容为之前crm show的内容，而不是xml内容，将 `resource-failure-stickiness="-INFINITY"` 修改为 `migration-threshold="-INFINITY"`，保存退出。crm会自动检测编辑后的配置，如果还有ERROR，会询问是否继续编辑，如果选择否，之前的编辑不会应用。再次调用`verify`检查配置，已经没有ERROR提示了。    
 　　Crm Shell其他的功能可以参考它的帮助文档。
 
-[rule_location_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_resource_options.html
-[rule_meta_attributes_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_cluster_options.html
-[rule_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch08.html
-[primitive_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/primitive-resource.html  
-[instance_attributes_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_instance_attributes.html
-[meta_attributes_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-options.html#_resource_meta_attributes
-[operations_link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_operations.html
+[rule-location-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_resource_options.html
+[rule-meta-attributes-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_cluster_options.html
+[rule-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch08.html
+[primitive-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/primitive-resource.html  
+[instance-attributes-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_instance_attributes.html
+[meta-attributes-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-options.html#_resource_meta_attributes
+[operations-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_resource_operations.html
 
 
