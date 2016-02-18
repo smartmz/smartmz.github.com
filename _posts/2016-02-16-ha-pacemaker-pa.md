@@ -63,8 +63,8 @@ icon: globe
 		* **[resources](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch05.html)** 集群要提供的服务（资源），TFS集群搭建HA使用OpenClusterFramework（OCF）资源   
 			* **[group](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch10.html#group-resources)** 可选，将多个资源合并为一组，同时执行操作   
 				* **[primitive][primitive-link]**　配置资源及其属性，包括资源的分数（Score）
-				* **[instance_attributes][instance-attributes-link]**　PA所需参数配置，通过`crm ra meta PA_XXX`命令查询    
-				* **[meta_attributes][meta-attributes-link]**　配置资源的属性   
+				* **[instance-attributes][instance-attributes-link]**　PA所需参数配置，通过`crm ra meta PA_XXX`命令查询    
+				* **[meta-attributes][meta-attributes-link]**　配置资源的属性   
 				* **[operations][operations-link]**　操作配置，操作必须是PA支持的操作 
 		* **constraints** 资源在不同节点上的切换规则   
 			* **[rsc_location](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_deciding_which_nodes_a_resource_can_run_on.html#_location_properties)** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级   
