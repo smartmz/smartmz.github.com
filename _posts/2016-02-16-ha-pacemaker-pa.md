@@ -57,10 +57,10 @@ icon: globe
 * **cib** CIB配置文件根节点 →[参考][cib-link]
 	* **configuration** 集群配置信息的根节点   
 		* **crm_config** 集群全局配置   
-			* **cluster_property_set** 属性配置 →[参考][cluster-property-set-link]
+			* **cluster_property-set** 属性配置 →[参考][cluster-property-set-link]
 		* **nodes** 集群各个节点的配置 →[参考][nodes-link]
 			* **instance_attributes** Node参数配置   
-		* **resources** 集群要提供的服务（资源），TFS集群搭建HA使用OpenClusterFramework（OCF）资源 →[参考][resources-link]
+		* **resources** 服务资源，TFS集群搭建HA使用OpenClusterFramework（OCF）资源 →[参考][resources-link]
 			* **group** 可选，将多个资源合并为一组同时执行操作 →[参考][group-link]
 				* **primitive**　配置资源及其属性，包括资源的分数（Score） →[参考][primitive-link]
 				* **instance_attributes**　PA所需参数配置，`crm ra meta PA_XXX`命令查询 →[参考][instance-attributes-link]
@@ -69,8 +69,8 @@ icon: globe
 		* **constraints** 资源在不同节点上的切换规则   
 			* **rsc_location** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级   →[参考][rsc_location-link]
 				* **rule**　直接使用rsc-loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location][rule-location-link]，还可以[应用于meta_attributes][rule-meta-attributes-link] →[参考][rule-link]
-			* **rsc_order** 可选，确定多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式 →[参考][rsc-order-link]
-			* **rsc_colocation** 可选，确定多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)的方式完成更多的依赖方式 →[参考][rsc-colocation-link]
+			* **rsc_order** 可选，配置多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式 →[参考][rsc-order-link]
+			* **rsc_colocation** 可选，配置多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)完成更多方式 →[参考][rsc-colocation-link]
 		* **rsc_defaults** 全局资源默认配置。如果在<resources/>中对资源进行了配置，以<resources/>中的为准，否则以这里配置的为准   
 	* **status** 集群每个节点的历史资源。集群根据该节点的内容构建完整的状态。注意该节点主要由LRMd在内存中操作，不会存盘，也不需要人为编辑，使用`#cibadmin --query|-Q`命令可以查看该节点的内容。   
 
@@ -81,105 +81,104 @@ icon: globe
 
 ```xml
 <cib epoch="37" admin_epoch="0" validate-with="pacemaker-1.0" crm_feature_set="3.0.1" have-quorum="1" dc-uuid="7508b0ea-78aa-4011-917a-fe5f5d7082cd" num_updates="184">
-	<configuration>
-		<crm_config>
-			<cluster_property_set id="cib-bootstrap-options">
-				<!--配置了4个参数-->
-				<nvpair id="cib-bootstrap-options-dc-version" name="dc-version" value="1.0.12-unknown"/>
-				<nvpair id="cib-bootstrap-options-cluster-infrastructure" name="cluster-infrastructure" value="Heartbeat"/>
-				<nvpair id="cib-bootstrap-options-symmetric-cluster" name="symmetric-cluster" value="true"/>
-				<nvpair id="cib-bootstrap-options-stonith-enabled" name="stonith-enabled" value="false"/>
-			</cluster_property_set>
-		</crm_config>
-		<nodes>
-			<!--两个节点-->
-			<node id="268a3f70-2d62-4003-a323-0cd946fdc100" uname="yf04501" type="normal">
-				<instance_attributes id="nodes-268a3f70-2d62-4003-a323-0cd946fdc100">
-					<nvpair id="nodes-268a3f70-2d62-4003-a323-0cd946fdc100-standby" name="standby" value="off"/>
-				</instance_attributes>
-			</node>
-			<node id="7508b0ea-78aa-4011-917a-fe5f5d7082cd" uname="yf04401" type="normal">
-				<instance_attributes id="nodes-7508b0ea-78aa-4011-917a-fe5f5d7082cd">
-					<nvpair id="nodes-7508b0ea-78aa-4011-917a-fe5f5d7082cd-standby" name="standby" value="off"/>
-				</instance_attributes>
-			</node>
-		</nodes>
-		<resources>
-			<!--使用一个group将两个资源划分为一组，同时启动、停止、监控-->
-			<group id="ns-group">
-				<!--资源1：ocf类型，名字为ip-alias，RA使用IPaddr2，调度VIP-->
-				<primitive class="ocf" id="ip-alias" provider="heartbeat" type="IPaddr2">
-					<instance_attributes id="ip-alias-instance_attributes">
-						<!--给PA传参，PA需要的参数可以通过 # crm ra meta XXX 命令查询-->
-						<nvpair id="ip-alias-instance_attributes-ip" name="ip" value="172.16.138.252"/>
-						<nvpair id="ip-alias-instance_attributes-nic" name="nic" value="eth1:1"/>
-					</instance_attributes>
-					<meta_attributes id="ip-alias-meta_attributes">
-						<!--设置集群中节点资源的允许状态为 允许运行 的-->
-						<nvpair id="ip-alias-meta_attributes-target-role" name="target-role" value="Started"/>
-					</meta_attributes>
-					<operations>
-						<!--添加操作，只配置了monitor，每2s执行一次-->
-						<op id="ip-alias-monitor-2s" interval="2s" name="monitor"/>
-					</operations>
-				</primitive>
-				<!--资源2：ocf类型，名字为ip-alias，RA使用NameServer，调度TFS NS进程-->
-				<primitive class="ocf" id="tfs-name-server" provider="heartbeat" type="NameServer">
-					<instance_attributes id="tfs-name-server-instance_attributes">
-						<nvpair id="tfs-name-server-instance_attributes-basedir" name="basedir" value="/data/tfs"/>
-						<nvpair id="tfs-name-server-instance_attributes-nsip" name="nsip" value="localhost"/>
-						<nvpair id="tfs-name-server-instance_attributes-nsport" name="nsport" value="10000"/>
-						<nvpair id="tfs-name-server-instance_attributes-user" name="user" value="root"/>
-					</instance_attributes>
-					<meta_attributes id="tfs-name-server-meta_attributes">
-						<!--设置集群中节点资源的允许状态为 允许运行 的；设定资源启动成功的初始分数为 正无穷；设定失败后设为 负无穷-->
-						<nvpair id="tfs-name-server-meta_attributes-target-role" name="target-role" value="Started"/>
-						<nvpair id="tfs-name-server-meta_attributes-resource-stickiness" name="resource-stickiness" value="INFINITY"/>
-						<nvpair id="tfs-name-server-meta_attributes-resource-failure-stickiness" name="resource-failure-stickiness" value="-INFINITY"/>
-					</meta_attributes>
-					<operations>
-						<!--配置NameServer操作，monitor每2s执行一次,start和stop不会循环执行-->
-						<op id="tfs-name-nameserver-monitor-2s" interval="2s" name="monitor"/>
-						<op id="tfs-name-nameserver-start" interval="0s" name="start" timeout="30s"/>
-						<op id="tfs-name-nameserver-stop" interval="0s" name="stop" timeout="30s"/>
-					</operations>
-				</primitive>
-			</group>
-		</resources>
-		<constraints>
-			<!--针对tfs-name-server这一资源设置不同节点的分数-->
-			<rsc_location id="cli-prefer-tfs-name-server" rsc="tfs-name-server">
-				<!--添加规则，如果#uname为yf04401，则该节点的分数设置为 正无穷-->
-				<rule id="cli-prefer-rule-tfs-name-server" score="INFINITY" boolean-op="and">
-					<expression id="cli-prefer-expr-tfs-name-server" attribute="#uname" operation="eq" value="yf04401" type="string"/>
-				</rule>
-			</rsc_location>
-		</constraints>
-		<!--添加全局默认资源配置，初始分数配置为100，在resource节点中，tfs-name-server资源覆盖了该配置，ip-alias资源使用该配置-->
-		<rsc_defaults>
-			<meta_attributes id="rsc_defaults-options">
-				<nvpair id="rsc_defaults-options-resource-stickiness" name="resource-stickiness" value="100"/>
-			</meta_attributes>
-		</rsc_defaults>
-	</configuration>
-	<status>
-		......
-	</status>
+  <configuration>
+    <crm_config>
+      <cluster_property_set id="cib-bootstrap-options">
+        <!--配置了4个参数-->
+        <nvpair id="cib-bootstrap-options-dc-version" name="dc-version" value="1.0.12-unknown"/>
+        <nvpair id="cib-bootstrap-options-cluster-infrastructure" name="cluster-infrastructure" value="Heartbeat"/>
+        <nvpair id="cib-bootstrap-options-symmetric-cluster" name="symmetric-cluster" value="true"/>
+        <nvpair id="cib-bootstrap-options-stonith-enabled" name="stonith-enabled" value="false"/>
+      </cluster_property_set>
+    </crm_config>
+    <nodes>
+      <!--两个节点-->
+      <node id="268a3f70-2d62-4003-a323-0cd946fdc100" uname="yf04501" type="normal">
+        <instance_attributes id="nodes-268a3f70-2d62-4003-a323-0cd946fdc100">
+          <nvpair id="nodes-268a3f70-2d62-4003-a323-0cd946fdc100-standby" name="standby" value="off"/>
+        </instance_attributes>
+      </node>
+      <node id="7508b0ea-78aa-4011-917a-fe5f5d7082cd" uname="yf04401" type="normal">
+        <instance_attributes id="nodes-7508b0ea-78aa-4011-917a-fe5f5d7082cd">
+          <nvpair id="nodes-7508b0ea-78aa-4011-917a-fe5f5d7082cd-standby" name="standby" value="off"/>
+        </instance_attributes>
+      </node>
+    </nodes>
+    <resources>
+      <!--使用一个group将两个资源划分为一组，同时启动、停止、监控-->
+      <group id="ns-group">
+        <!--资源1：ocf类型，名字为ip-alias，RA使用IPaddr2，调度VIP-->
+        <primitive class="ocf" id="ip-alias" provider="heartbeat" type="IPaddr2">
+          <instance_attributes id="ip-alias-instance_attributes">
+            <!--给PA传参，PA需要的参数可以通过 # crm ra meta XXX 命令查询-->
+            <nvpair id="ip-alias-instance_attributes-ip" name="ip" value="172.16.138.252"/>
+            <nvpair id="ip-alias-instance_attributes-nic" name="nic" value="eth1:1"/>
+          </instance_attributes>
+          <meta_attributes id="ip-alias-meta_attributes">
+            <!--设置集群中节点资源的允许状态为 允许运行 的-->
+            <nvpair id="ip-alias-meta_attributes-target-role" name="target-role" value="Started"/>
+          </meta_attributes>
+          <operations>
+            <!--添加操作，只配置了monitor，每2s执行一次-->
+            <op id="ip-alias-monitor-2s" interval="2s" name="monitor"/>
+          </operations>
+        </primitive>
+        <!--资源2：ocf类型，名字为ip-alias，RA使用NameServer，调度TFS NS进程-->
+        <primitive class="ocf" id="tfs-name-server" provider="heartbeat" type="NameServer">
+          <instance_attributes id="tfs-name-server-instance_attributes">
+            <nvpair id="tfs-name-server-instance_attributes-basedir" name="basedir" value="/data/tfs"/>
+            <nvpair id="tfs-name-server-instance_attributes-nsip" name="nsip" value="localhost"/>
+            <nvpair id="tfs-name-server-instance_attributes-nsport" name="nsport" value="10000"/>
+            <nvpair id="tfs-name-server-instance_attributes-user" name="user" value="root"/>
+          </instance_attributes>
+          <meta_attributes id="tfs-name-server-meta_attributes">
+            <!--设置集群中节点资源的允许状态为 允许运行 的；设定资源启动成功的初始分数为 正无穷；设定失败后设为 负无穷-->
+            <nvpair id="tfs-name-server-meta_attributes-target-role" name="target-role" value="Started"/>
+            <nvpair id="tfs-name-server-meta_attributes-resource-stickiness" name="resource-stickiness" value="INFINITY"/>
+            <nvpair id="tfs-name-server-meta_attributes-resource-failure-stickiness" name="resource-failure-stickiness" value="-INFINITY"/>
+          </meta_attributes>
+          <operations>
+            <!--配置NameServer操作，monitor每2s执行一次,start和stop不会循环执行-->
+            <op id="tfs-name-nameserver-monitor-2s" interval="2s" name="monitor"/>
+            <op id="tfs-name-nameserver-start" interval="0s" name="start" timeout="30s"/>
+            <op id="tfs-name-nameserver-stop" interval="0s" name="stop" timeout="30s"/>
+          </operations>
+        </primitive>
+      </group>
+    </resources>
+    <constraints>
+      <!--针对tfs-name-server这一资源设置不同节点的分数-->
+      <rsc_location id="cli-prefer-tfs-name-server" rsc="tfs-name-server">
+        <!--添加规则，如果#uname为yf04401，则该节点的分数设置为 正无穷-->
+        <rule id="cli-prefer-rule-tfs-name-server" score="INFINITY" boolean-op="and">
+          <expression id="cli-prefer-expr-tfs-name-server" attribute="#uname" operation="eq" value="yf04401" type="string"/>
+        </rule>
+      </rsc_location>
+    </constraints>
+    <!--添加全局默认资源配置，初始分数配置为100，在resource节点中，tfs-name-server资源覆盖了该配置，ip-alias资源使用该配置-->
+    <rsc_defaults>
+      <meta_attributes id="rsc_defaults-options">
+        <nvpair id="rsc_defaults-options-resource-stickiness" name="resource-stickiness" value="100"/>
+      </meta_attributes>
+    </rsc_defaults>
+  </configuration>
+  <status>
+    ......
+  </status>
 </cib>
 ```
 ####如何操作CIB
-　　官方给了三条规定：
+　　官方给了三条**规定**：
 　　1. 不要手动操作cib.xml
 　　2. 遵循第1条
-　　3. 如果不遵循第1条，集群有权拒绝使用手动更改的CIB
-
+　　3. 如果不遵循第1条，集群有权拒绝使用手动更改的CIB   
 　　鉴于此，我们需要通过 `cibadmin` 更新CIB。所有的更新及时生效并同步到所有集群节点。
 #####查询（Query）
 ```sh
 #cibadmin --query|-Q
 #cibadmin --query|-Q --obj_type {Xml_Node}
 ```
-　　第一条命令查询内存中的整个CIB配置，第二条命令查询CIB的一个XML节。这两条命令可以结合修改命令对内存中的CIB配置进行修改：
+　　第一条命令查询内存中整个CIB配置，第二条查询CIB的一个XML节。这两条命令可以结合修改命令对内存中的CIB配置进行修改：
 
 ```sh
 # cibadmin --query > tmp.xml
@@ -210,7 +209,7 @@ cibadmin --delete|-D --crm_xml '{XML_Tag}'
 # crm_attribute --type crm_config --attr-name symmetric-cluster --attr-value true/false 是否可以在集群的任何节点上迁移服务
 # crm_attribute --type rsc_defaults --name resource-stickiness --update 100 设置全局默认资源配置
 ```
-> 官方提供了沙箱操作来测试更新后的CIB，可以参考[Making Configuration Changes in a Sandbox](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-config-sandboxes.html)，文中不再详述。
+> 官方提供了沙箱操作来测试更新后的CIB，可以参考[Making Configuration Changes in a Sandbox](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-config-sandboxes.html)，如果需要，请自行学习，文中不再详述。
 
 ###CRM shell
 　　启动Pacemaker服务后，更新CIB配置即可让集群运转起来。这里介绍一个工具 crmsh，该工具可以查看当前集群中的资源运行情况，包括查看目前资源的master节点，配置是否正确，集群系统支持的资源类型等，当然也可以对CIB资源进行直接操作配置。   
