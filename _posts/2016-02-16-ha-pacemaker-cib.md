@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[HA]Pacemaker的资源调度配置(PA配置)"
+title: "[HA]Pacemaker的CIB配置"
 date: 2016-02-16 16:42
 keywords: tfs,ha
 description: Heartbeat v3资源管理层的重点
@@ -9,8 +9,7 @@ tags: [ha, pacemaker]
 group: archive
 icon: globe
 ---
-　　高可用HA模型里的LRM，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控。   
-　　这里涉及到两方面，一是资源本身，二是根据资源和LRM的调度指令对资源实现调度。对应到具体的实现上，第一部分内容就是Pacemaker的资源——CIB，第二部分就是Pacemaker的资源调度——PA。。第一部分参见[《[HA]Pacemaker定制OCF资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第二部分资源调度如何配置。  
+　　HA的主要工作就是根据集群当前情况对资源进行分配调度，达到服务不中断的目的。这里涉及到两方面，一是资源本身，二是根据资源和PE的调度指令对资源实现调度。对应到具体的实现上，第一部分内容涉及Pacemaker的调度资源，就是RA，RA重点关注OCF类的；第二部分涉及Pacemaker如何进行资源调度，就是CIB配置。集群的CRM通过CIB配置决策资源在各个节点上的分配，然后通过节点上的TE调用RA完成资源的启停。第一部分参见[《[HA]Pacemaker定制OCF类RA资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第二部分资源调度如何配置。   
 
 <!-- more -->
  
@@ -33,10 +32,10 @@ icon: globe
 　　master选举逻辑根据PE的决策指令在所有的节点中选择一个节点（CRMd）作为master，如果该节点的CRMd出错，会再选择一个。这个选举逻辑官方叫做 DC(Designated Controller)。具体的过程是：  
 　　DC将PE的决策指令按照指定的优先级顺序传递给本节点的LRMd、通过CRMd传递给其他节点的LRMd，同时确定一个希望的（expected）master. 各个节点的LRMd调用TE执行具体的决策指令选出各自认为的master，将结果回传给DC，DC根据之前希望的master和其他节点已经回传的执行结果确定是继续等待优先级高的节点的结果，还是终断本次选举并通知PE再进行一轮选举。   
 　　在一些情况下，为了保护共享数据或者完成数据恢复，DC可能决策某节点需要脱离集群，这需要STONITHd协助完成。    
-　　在整个过程中重点需要搞清楚的有两点：CIB怎么配置，这是本文的重点；DC过程如何选择master，可以参考[《[HA]Pacemaker的分数机制》](http://smartmz.github.io/2016/02/17/ha-pacemaker-score)    
+　　在整个过程中重点需要搞清楚的有两点：CIB怎么配置，这是本文的重点；DC过程如何选择master，可以参考[《[HA]Pacemaker的分数机制和资源黏性》](http://smartmz.github.io/2016/02/18/ha-pacemaker-score-and-stickiness)    
 ###Pacemaker支持的集群模式
 　　[《[HA]Linux-HA基本原理》](http://smartmz.github.io/2016/01/15/ha-base-knowlege)中提到的几种集群形式Pacemaker都可以支持，在TFS集群的搭建过程中主要使用主备模式，也是相关系列文章关注的模式。    
-　　Pacemaker官方介绍了其他的模式，可以参考[这里](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_types_of_pacemaker_clusters.html)和[这里](http://clusterlabs.org/wiki/Main_Page)。
+　　Pacemaker官方介绍了其他的模式，可以参考[这里](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_types_of_pacemaker_clusters.html)和[这里](http://clusterlabs.org/wiki/Main_Page)。这些模式实际上是通过CIB的资源分数、节点属性设置实现的。一定要注意，HA集群不仅仅支持两个节点、一个资源，完全可以支持多节点、多资源。
 ###CIB配置
 　　CIB描述了集群全部信息供DC使用。
 ####CIB内容
@@ -60,21 +59,21 @@ icon: globe
 			* **cluster_property-set** 属性配置 →[参考][cluster-property-set-link]
 		* **nodes** 集群各个节点的配置 →[参考][nodes-link]
 			* **instance_attributes** Node参数配置   
-		* **resources** 服务资源，TFS集群搭建HA使用OpenClusterFramework（OCF）资源 →[参考][resources-link]
+		* **resources** 服务资源，TFS集群搭建HA使用RA资源 →[参考][resources-link]
 			* **group** 可选，将多个资源合并为一组同时执行操作 →[参考][group-link]
-				* **primitive**　配置资源及其属性，包括资源的分数（Score） →[参考][primitive-link]
-				* **instance_attributes**　PA所需参数配置，`crm ra meta PA_XXX`命令查询 →[参考][instance-attributes-link]
-				* **meta_attributes**　配置资源的属性 →[参考][meta-attributes-link]
-				* **operations**　操作配置，操作必须是PA支持的操作 →[参考][operations-link]
+				* **primitive** 配置资源及其属性，包括资源的分数(Score) →[参考][primitive-link]
+				* **instance_attributes** OCF_RA所需参数配置，`crm ra meta OCF_RA_XXX`命令查询 →[参考][instance-attributes-link]
+				* **meta_attributes** 配置资源的属性 →[参考][meta-attributes-link]
+				* **operations** 操作配置，操作必须是OCF RA支持的操作 →[参考][operations-link]
 		* **constraints** 资源在不同节点上的切换规则   
-			* **rsc_location** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级   →[参考][rsc_location-link]
-				* **rule**　直接使用rsc-loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location][rule-location-link]，还可以[应用于meta_attributes][rule-meta-attributes-link] →[参考][rule-link]
+			* **rsc_location** 资源定位约束，确定不同节点上资源切换优先级（Score），也即针对同一资源，节点的优先级 →[参考][rsc_location-link]
+				* **rule** 直接使用rsc-loaction可以实现优先级配置，使用rule可以使得配置项更加灵活易改，它能够精确配置节点的分数。rule不仅仅可以[应用于location][rule-location-link]，还可以[应用于meta_attributes][rule-meta-attributes-link] →[参考][rule-link]
 			* **rsc_order** 可选，配置多资源的启动/停止顺序，多个配置之间是AND关系；可以使用[Ordered Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-ordering.html#_ordered_set)的方式完成更多的顺序方式 →[参考][rsc-order-link]
 			* **rsc_colocation** 可选，配置多资源的依赖；也可以使用[Colocation Set](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-resource-sets-colocation.html)完成更多方式 →[参考][rsc-colocation-link]
 		* **rsc_defaults** 全局资源默认配置。如果在<resources/>中对资源进行了配置，以<resources/>中的为准，否则以这里配置的为准   
 	* **status** 集群每个节点的历史资源。集群根据该节点的内容构建完整的状态。注意该节点主要由LRMd在内存中操作，不会存盘，也不需要人为编辑，使用`#cibadmin --query|-Q`命令可以查看该节点的内容。   
 
-> 有关资源分数和节点分数的内容，请参考()[]。
+> 配置中的score、stickiness等容易混淆，在配置时只要简单记住score用在constraints中，stickiness用在resource中即可。有关详细内容请参考[《[HA]Pacemaker的分数机制和资源黏性》](http://smartmz.github.io/2016/02/18/ha-pacemaker-score-and-stickiness)。
 
 #####CIB例子
 　　下面通过TFS搭建HA时的CIB配置来说明一些关键的地方。
@@ -110,7 +109,7 @@ icon: globe
         <!--资源1：ocf类型，名字为ip-alias，RA使用IPaddr2，调度VIP-->
         <primitive class="ocf" id="ip-alias" provider="heartbeat" type="IPaddr2">
           <instance_attributes id="ip-alias-instance_attributes">
-            <!--给PA传参，PA需要的参数可以通过 # crm ra meta XXX 命令查询-->
+            <!--给RA传参，RA需要的参数可以通过 # crm ra meta XXX 命令查询-->
             <nvpair id="ip-alias-instance_attributes-ip" name="ip" value="172.16.138.252"/>
             <nvpair id="ip-alias-instance_attributes-nic" name="nic" value="eth1:1"/>
           </instance_attributes>
@@ -135,6 +134,7 @@ icon: globe
             <!--设置集群中节点资源的允许状态为 允许运行 的；设定资源启动成功的初始分数为 正无穷；设定失败后设为 负无穷-->
             <nvpair id="tfs-name-server-meta_attributes-target-role" name="target-role" value="Started"/>
             <nvpair id="tfs-name-server-meta_attributes-resource-stickiness" name="resource-stickiness" value="INFINITY"/>
+            <!--resource-failure-stickiness已经弃用，改用migration-threshold-->
             <nvpair id="tfs-name-server-meta_attributes-resource-failure-stickiness" name="resource-failure-stickiness" value="-INFINITY"/>
           </meta_attributes>
           <operations>
@@ -259,7 +259,12 @@ crm(live)configure#
 接上
 crm(live)configure# edit
 ```
-　　进入vim编辑模式，编辑内容为之前crm show的内容，而不是xml内容，将 `resource-failure-stickiness="-INFINITY"` 修改为 `migration-threshold="-INFINITY"`，保存退出。crm会自动检测编辑后的配置，如果还有ERROR，会询问是否继续编辑，如果选择否，之前的编辑不会应用。再次调用`verify`检查配置，已经没有ERROR提示了。    
+　　进入vim编辑模式，编辑内容为之前crm show的内容，而不是xml内容，将 `resource-failure-stickiness="-INFINITY"` 修改为 `migration-threshold="-INFINITY"`，保存退出。crm会自动检测编辑后的配置，如果还有ERROR，会询问是否继续编辑，如果选择否，之前的编辑不会应用。再次调用`verify`检查配置，已经没有ERROR提示了。 
+　　修改全部完成后提交一下：
+```sh
+接上
+crm(live)configure# commit
+``` 
 　　Crm Shell其他的功能可以参考它的帮助文档。
 
 [rule-location-link]:http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_using_rules_to_control_resource_options.html

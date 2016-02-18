@@ -20,10 +20,10 @@ icon: globe
 | HA | 公司 | High Available，高可用。Linux-HA通过一组应用保证集群的高可用性。三方面内容：1 集群中各个节点之间可以相互感知；2 节点故障自动恢复；3 节点上的应用服务故障自动恢复 |
 | Heartbeat | 环境 | Cluster Messaging Layer，心跳信息传递层。集群各节点相互感知和通信的基础环境。节点通过此能感知其他节点（或节点上的应用服务）是否存活。心跳系统通过hearbeat可以在节点（机器）级别对集群中各个节点进行监控 |
 | HA_aware | 制度 | 集群事务决策，也叫策略引擎，PE(Policy Engine)，根据底层的心跳信息，调用API进行集群事务决策，主要包括实现剔除无效节点，上线重新设置的节点，设置主节点、辅助节点，并且能够将底层信息传递给更上层。节点之间通过XML传递数据 |
-| DC | 协调员 | Designated Controller，根据ha_aware从多个节点中选举出Leader |
-| CRM | 董事长 | Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署，针对集群的资源统筹管理。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控 |
-| LRM | 经理 | Local resources Manage，本地资源管理，落实CRM的决策，真正管理本地资源的启停和状态监控 |
-| RA | 员工 | Resource Agent，资源管理客户端，对某一个资源进行管理的工具，接收LRM的调度管理，对具体资源执行管理操作，OCF支持的RA在默认安装时在/usr/lib/ocf/resource.d/heartbeat/路径下查到 |
+| DC | 协调员 | Designated Controller，从多个节点中选举出来，用来完成集群中服务运行过在哪里的所有决策。 **注意**，DC节点和资源运行节点不一定是同一个节点 |
+| CRM | 董事长 | Cluster Resources Manager，v2.x增加，比v1.x的haresource具有更强大的资源管理功能，对集群的资源进行管理，实现资源分配，任何节点的资源都由CRM管理是否启动。CRM在各个节点上都有部署。通过CRM可以在资源（服务）级别对集群中各个节点上的服务进行监控 |
+| LRM | 经理 | Local resources Manage，本地资源管理，获取本地某个资源的状态，并且实现本地资源监控，如当检测到资源不可用时，启动进程等。|
+| RA | 员工 | Resource Agent，资源管理客户端，对某一个资源进行管理的工具(其实就是支持启停、监控资源等功能的脚本)，接收LRM的调度管理，对具体资源执行监控管理操作，OCF类的RA在默认安装时在`/usr/lib/ocf/resource.d/heartbeat/`路径，TE也调用RA来完成PE的策略 |
 | CIB | 数据库 | Cluster information base，集群信息库，每个节点上都保存一份集群的CIB |
 ###其他涉及的组件
 名称 | 含义
@@ -31,8 +31,8 @@ icon: globe
 haresource | 集群资源管理器，v1.x、v2.x都包含，v2.x还提供了功能更强大的CRM
 ha-logd | 集群时间日志服务
 CCM | Consensus Cluster Membership，集群成员一致性管理模块
-PE | Cluster Policy Engine，集群策略引擎
-TE | Cluster Transition Engine，策略执行引擎
+PE | Cluster Policy Engine，集群策略引擎，根据CRM对资源的分配做出节点上的服务应该启动还是停止的策略，但不具体实行。只有被选为DC的节点才运行
+TE | Cluster Transition Engine，策略执行引擎，执行PE的策略。只有被选为DC的节点才运行
 Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从集群环境中脱离或重启
 ###组件对应软件
 * Messaging Layer
@@ -48,7 +48,7 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 		* heartbeat用于底层信息传递；
 		* Pacemaker负责CRM资源管理，不仅可以和heartbeat工作，也可以和corosync（基于OpenAIS）一起工作；实际上目前heartbeat是在Pacemaker项目中的；
 		* Cluster-Glue相当于中间层，将heartbeat（或corosync）和Pacemaker联系起来，包含LRM和STONITH：
-			* LRM调用Resource Agents实现各种资源启动、停止、监控等，Resource Agents指各种的资源的LSB/OCF/STONITH脚本，必须能够接受参数{start|stop|restart|status}；LSB就是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本；
+			* LRM负责管理和监控本地的资源，Resource Agents指各种的资源的LSB/OCF/STONITH脚本，必须能够接受参数{start|stop|restart|status}；LSB就是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本；
 			* STONITH，心跳系统，通过Heartbeat心跳信息层实现在硬件级别对节点进行控制。
 	* RGManager：Resource Group (Service) Manager，与cman搭配使用的CRM资源管理。
 	* RHCS：红帽集群套件，通过LVS（Linux Virtual Server）提供负载均衡集群，通过GFS文件系统提供存储集群功能。
@@ -59,9 +59,9 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 
 #####流程描述：
 * 在Messaging Layer层，各节点上部署支持Heartbeat信息交换的工具，通过广播交换心跳信息，并将所有信息聚合到CRM，由CRM统筹管理。心跳信息包含了服务器服务的运行状态信息等。
-* CRM通过Messaging Layer收集到集群节点的信息，从节点中推举出一个DC节点。可以使用任意一个节点的CRM配置更新CIB。
-* DC节点运行两个进程TE和PE，其中PE根据CIB进行决策，决定资源的分配和行为策略。如果CIB配置更新，DC负责同步更新到所有节点的LRM
-* LRM调用TE完成策略执行。
+* CRM通过Messaging Layer收集到集群节点的信息，根据CIB信息，从节点中推举出各个服务的DC节点，再通知给各个节点。
+* DC节点运行两个进程TE和PE，其中PE根据CRM的决策，决定资源的行为策略，也就是决策哪些资源在哪些节点是启动还是停止。
+* TE根据PE的结果调用RA完成启停资源服务。
 ###集群分裂和资源隔离
 　　在高可用（HA）系统中，当联系节点的心跳断开时，本来为一个整体、动作协调的HA系统就会分裂为独立的个体（每个个体中可以包含一个或多个节点）。由于相互失去了联系，彼此都以为对方出了故障，节点上的HA软件像“裂脑人”一样，“本能”地争抢“共享资源”、争起“应用服务”，就会发生严重后果，或者共享资源被瓜分、多个服务都起不来了，或者多个服务都起来了，同时读写“共享存储”，导致数据损坏或者数据不完整。这种现象俗称“脑裂”。
 　　脑裂正常情况下是无法见到的，现代集群都应该有保护机制来避免这种情况发生。例如RHCS引入的fence的概念，例如2个节点集群，当心跳断开导致节点之间互相无法通信的时候，每个节点会尝试fence掉对方（确保对方释放掉文件系统资源）后再继续运行服务访问资源。这样，就可以确保只有一个节点可以访问资源而不会导致数据损坏。
