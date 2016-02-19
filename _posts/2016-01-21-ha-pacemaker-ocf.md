@@ -19,7 +19,7 @@ icon: globe
 
 <!-- more -->
 
-　　如果需要pacemaker更好地对服务进行高可用保障，就得实现一个OCF类的RA资源。这是我们在本文重点要说的。
+　　如果需要pacemaker更好地对服务进行高可用保障，就得实现一个OCF类的RA资源。这是我们在本文重点要说的。   
 　　Pacemaker自带的资源管理程序都在`/usr/lib/ocf/resource.d`目录中。其中的`heartbeat`目录包含了那些自带的常用服务，这些脚本可以作为自己实现的参考。
 
 　　每个OCF资源是一个可执行的脚本文件，通过**命令行参数和环境变量**接收来自 Pacemaker 的输入。下面是一个简单的例子，创建了一个名叫 test 的资源。
@@ -130,9 +130,7 @@ case "$COMMAND" in
 esac
 ```
 ###资源的meta
-使用以下命令显示该OCF资源的meta信息：
-`# crm ra meta test`
-输出：
+　　使用`# crm ra meta test`命令显示该OCF资源的meta信息：
 
 ``` text
 ocf:heartbeat:test
@@ -148,14 +146,15 @@ Operations' defaults (advisory minimum):
     status        timeout=30s
     monitor_0     interval=10s timeout=30s
 ```
-　　实际上就是脚本中`metadata_test()`定义的内容，定义了脚本需要接收的参数和支持的action（`meta-data`和`validate-all`不显示）。这个OCF资源相比LSB资源来说，多了`monitor_0`这样一个命令。
+　　实际上就是脚本中`metadata_test()`定义的内容，定义了脚本需要接收的参数和支持的action（`meta-data`和`validate-all`不显示）。这个OCF资源相比LSB资源来说，多了`monitor_0`这样一个命令。   
 　　脚本中定义参数的`parameter/content`支持的类型有 string、integer、boolean等。default属性可以定义参数的默认值。需要注意的是，定义资源未指定参数时，指定的默认值并不会出现在`OCF_RESKEY_<参数名>`环境变量中，而是会放在另外的环境变量`OCF_RESKEY_<参数名>_default`中。
 
 ##资源的action
 　　start、stop这两个命令，主要实现服务启动或停止；monitor命令实现状态检测。在实际编写脚本的时候需要**注意**，一定要保证在start、stop命令执行完成返回后，使用monitor命令检测状态。如果在未完成start或stop时就返回，比如直接将命令放后台执行，会导致通过monitor命令检测状态时，由于此时还未启动完成或stop而失败，导致被认为是故障，从而导致资源重启或切换。
+
 ####参数
-　　命令的参数是通过环境变量传递的。
-　　比如test资源中的service_path 和 probe_url 会分别通过环境变量 `$OCF_RESKEY_service_path` 和 `$OCF_RESKEY_service_path` 传递。
+　　命令的参数是通过环境变量传递的。   
+　　比如test资源中的service\_path 和 probe\_url 会分别通过环境变量 `$OCF_RESKEY_service_path` 和 `$OCF_RESKEY_service_path` 传递。
 ####命令返回值
 OCF资源常用的返回值有：
 
@@ -169,11 +168,9 @@ OCF_ERR_INSTALLED=5
 OCF_ERR_CONFIGURED=6
 OCF_NOT_RUNNING=7
 ```
-　　所有命令执行成功时应当返回`OCF_SUCCESS`。出错时根据具体情况返回对应错误码。如start启动失败，monitor监控到服务故障时应当返回OCF_NOT_RUNNING。在检查参数错误时应当返回 OCF_ERR_CONFIGURED。其他错误一般可以返回OCF_ERR_GENERIC。**所有命令完成后都需要有返回值**。
+　　所有命令执行成功时应当返回`OCF_SUCCESS`。出错时根据具体情况返回对应错误码。如start启动失败，monitor监控到服务故障时应当返回OCF\_NOT\_RUNNING。在检查参数错误时应当返回 OCF\_ERR\_CONFIGURED。其他错误一般可以返回OCF\_ERR\_GENERIC。**所有命令完成后都需要有返回值**。
 ####日志
-输出日志使用：
-`ocf_log {日志级别} {日志内容}`
-该命令将日志输出到ha配置指定的文件中。ha的配置文件`/etc/ha.d/ha.cf`中定义了日志输出路径和日志输出级别：
+　　输出日志使用 `ocf_log {日志级别} {日志内容}`，该命令将日志输出到ha配置指定的文件中。ha的配置文件`/etc/ha.d/ha.cf`中定义了日志输出路径和日志输出级别：
 
 ```text
 # cat /etc/ha.d/ha.cf

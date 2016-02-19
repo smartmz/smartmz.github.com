@@ -47,7 +47,7 @@ icon: globe
 * resource-stickiness=INFINITY & resource-failure-stickiness=-INFINITY 资源一旦成功就变为集群中**最愿意**运行服务的节点，以后需要迁移服务时仍然在该节点上运行服务的倾向最高；资源一旦失败就变为集群中**最不愿意**运行服务的节点，尽量不会再在该节点上运行服务。
 
 #####　Pacemaker 1.0之后
-　　resource-stickiness和migration-threshold搭配，resource-stickiness表示资源成功一次资源获得多少分，一般设置正数，未配置默认为0；migration-threshold表示资源失败多少次以后资源就会从该节点迁离，一般也设置正数，未配置默认为INFINITY。
+　　resource-stickiness和migration-threshold搭配，resource-stickiness表示资源成功一次资源获得多少分，一般设置正数，未配置默认为0；migration-threshold表示资源失败多少次以后资源就会从该节点迁离，一般也设置正数，未配置默认为INFINITY。   
 　　比如：
 
 * resource-stickiness=100 & migration-threshold=10 资源每次成功加100分，失败10次后就要将服务从该节点迁离

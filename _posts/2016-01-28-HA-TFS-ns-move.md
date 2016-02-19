@@ -10,7 +10,7 @@ group: archive
 icon: globe
 ---
 ###描述
-　　TFS给HA提供的OCF资源中，监控NS服务是否可用逻辑不完善，导致在NS节点网络、负载较大时将NS服务标记为不可用，引起NameServer切换。
+　　TFS给HA提供的OCF资源中，监控NS服务是否可用逻辑不完善，导致在NS节点网络、负载较大时将NS服务标记为不可用，引起NameServer切换。   
 　　有关HA-RA资源的知识可以参考[《[HA]Pacemaker定制OCF类RA资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，文章最后“附2 - TFS-HA OCF资源脚本实例”给出的例子就是本文主要涉及的TFS-OCF资源脚本。
 
 <!-- more -->
@@ -166,16 +166,19 @@ int ReplicateBlock::replicate_block_to_server(const ReplBlock* b)
 ```
 　　src-DS节点的处理过程需要说明两点：一是刚才在NS上这个blockId对应的block被上了锁，整个过程为不可写状态，可能引发的其他任务在上面已经说明过了；二是发送block数据的过程没有考虑对网络的压力，在复制任务量大的情况下，TFS集群内压会大幅度升高：
 <center>![图2 集群内压增大（某一个DS的状态）](http://ww2.sinaimg.cn/bmiddle/a8484315jw1f0g8f3k8kjj20qv0j6n0l.jpg)</center><br/><center><font size=2>图2 集群内压增大（某一个DS的状态）</font></center>
-　　在新的TFS版本中可以在线调整任务数上限，可是这个版本没有……
+　　在新的TFS版本中可以在线调整任务数上限，可是这个版本没有……   
 　　了解任务的执行过程，简单说明一下导致当前TFS集群复制任务量大的原因。一般在两种情况会触发复制机制：
-　　1. 正常情况下，向TFS集群存文件，一个DS节点收到文件后，会根据配置中的min_replication和max_replication参数决定副本数，触发复制任务达到要求；
-　　2. 如果有DS节点的blocks丢失、损坏，或min_replication或max_replication参数调整，如果blocks的副本数不达要求，就会触发复制任务，为了区分1，叫做“紧急复制”（emergency replication）。
+
+1. 正常情况下，向TFS集群存文件，一个DS节点收到文件后，会根据配置中的min\_replication和max\_replication参数决定副本数，触发复制任务达到要求；
+2. 如果有DS节点的blocks丢失、损坏，或min\_replication或max\_replication参数调整，如果blocks的副本数不达要求，就会触发复制任务，为了区分1，叫做“紧急复制”（emergency replication）。
+
 　　当前TFS集群是因为调整参数引起的大量紧急复制任务：
 
- |min_replication|max_replication
----|---|---
-修改前|1|2
-修改后|3|3
+	| |min_replication|max_replication|
+	|---|---|---|
+	|修改前|1|2|
+	|修改后|3|3|
+
 　　任务开始后，整个集群的压力陡增，NS节点每隔一段时间就会迁移一次，导致之前NS节点建立的复制任务不能正常进行，新NS节点重建任务，陷入恶性循环。
 ###问题原因
 　　问题实际上不是出在TFS集群本身，而是出在HA对NS进程可用性的检测上，通过NS主节点上的HA的日志可以清楚的看到：

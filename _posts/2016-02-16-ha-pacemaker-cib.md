@@ -259,8 +259,9 @@ crm(live)configure#
 接上
 crm(live)configure# edit
 ```
-　　进入vim编辑模式，编辑内容为之前crm show的内容，而不是xml内容，将 `resource-failure-stickiness="-INFINITY"` 修改为 `migration-threshold="-INFINITY"`，保存退出。crm会自动检测编辑后的配置，如果还有ERROR，会询问是否继续编辑，如果选择否，之前的编辑不会应用。再次调用`verify`检查配置，已经没有ERROR提示了。 
+　　进入vim编辑模式，编辑内容为之前crm show的内容，而不是xml内容，将 `resource-failure-stickiness="-INFINITY"` 修改为 `migration-threshold="-INFINITY"`，保存退出。crm会自动检测编辑后的配置，如果还有ERROR，会询问是否继续编辑，如果选择否，之前的编辑不会应用。再次调用`verify`检查配置，已经没有ERROR提示了。   
 　　修改全部完成后提交一下：
+
 ```sh
 接上
 crm(live)configure# commit
