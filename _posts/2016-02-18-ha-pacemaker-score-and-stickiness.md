@@ -69,31 +69,31 @@ icon: globe
 
 ####配置示例
 　　以下情况不考虑资源黏性，只是用来体会以下节点分数的作用。假设有三个节点N{1,2,3}，有两个资源S{1,2}。   
-　　配置示例之前需要介绍一个CIB配置的资源全局参数symmetric-cluster，在cib→configuration→cluster_property_set中配置，默认为true表示资源可以在集群的任何节点上运行，置为false表示资源需要根据约束配置来决定在哪个节点上运行。也可以使用命令来设置该值：
+　　配置示例之前需要介绍一个CIB配置的资源全局参数symmetric-cluster，在cib→configuration→cluster\_property\_set中配置，默认为true表示资源可以在集群的任何节点上运行，置为false表示资源需要根据约束配置来决定在哪个节点上运行。也可以使用命令来设置该值：
 　　`# crm_attribute --name symmetric-cluster --update false`
 
 * 配置1
 <center>
 
- | | | | | | 
----|---|---|---|---|---|---
-资源|S1|S2|S1|S2|S1|S2
-节点|N1|N1|N2|N2|N3|N3
-分数|200|未设置|未设置|200|0|0
-</center>
+| | | | | | | |
+|---|---|---|---|---|---|---|
+|资源|S1|S2|S1|S2|S1|S2|
+|节点|N1|N1|N2|N2|N3|N3|
+|分数|200|未设置|未设置|200|0|0|
 
+</center>
 　　将symmetric-cluster=false，禁止资源在任意节点上运行，这样资源S1不能在N2上运行，资源S2不能在N1上运行。集群启动后，N1-S1-score > N3-S1-score， S1在N1，同理S2在N2上运行；如果N1、N2宕机，S1、S2会迁移到N3上运行。   
 
 * 配置2
 <center>
 
- | | | | | | 
----|---|---|---|---|---|---
-资源|S1|S2|S1|S2|S1|S2
-节点|N1|N1|N2|N2|N3|N3
-分数|200|-INFINITY|-INFINITY|200|未设置|未设置
-</center>
+| | | | | | | |
+|---|---|---|---|---|---|---|
+|资源|S1|S2|S1|S2|S1|S2|
+|节点|N1|N1|N2|N2|N3|N3|
+|分数|200|-INFINITY|-INFINITY|200|未设置|未设置|
 
+</center>
 　　将symmetric-cluster=true，资源可以在任意节点上运行，该配置和配置1就等同了。
 
 ###基于资源黏性和节点分数的决策原理
