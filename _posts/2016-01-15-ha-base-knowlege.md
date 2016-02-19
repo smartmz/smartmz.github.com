@@ -9,9 +9,13 @@ tags: [ha]
 group: archive
 icon: globe
 ---
-###集群事务决策
+　　高可用性HA(High Availability)指的是通过尽量缩短因日常维护操作（计划）和突发的系统崩溃（非计划）所导致的停机时间，以提高系统和应用的可用性。HA系统是目前企业防止核心服务系统因故障停机的最有效手段之一。     
+　　Linux-HA项目是高可用HA手段的一套开源实现，经过多年的应用、重构已经非常成熟。它基于事务驱动，提出一套完整的高可用HA集群事务决策模型，包括消息传输层、资源分配层、资源层等自下而上的三个层次，涉及到集群间通信、事务触发、资源管理、资源监控等。    
+　　为了比较好的理解模型的原理，我们首先列出涉及到的各种概念。
 
-先来看一下HA中出现的各种概念。
+###概念
+
+　　这里总结了一张表，将HA中的主要组件比拟为一个公司的各种部门和职务，以期从感性上对这些概念有一些认识。
 
 <!-- more -->
 
@@ -25,7 +29,9 @@ icon: globe
 | LRM | 经理 | Local resources Manage，本地资源管理，获取本地某个资源的状态，并且实现本地资源监控，如当检测到资源不可用时，启动进程等。|
 | RA | 员工 | Resource Agent，资源代理，对某一个资源完成管理的工具(其实就是支持启停、监控资源等功能的脚本)，接收LRM的调度管理，对具体资源执行监控管理操作，OCF类的RA是最常使用的，默认安装时在`/usr/lib/ocf/resource.d/heartbeat/`路径 |
 | CIB | 数据库 | Cluster information base，集群信息库，每个节点上都保存一份集群的CIB |
+
 ###其他涉及的组件
+
 名称 | 含义
 --- | ---
 haresource | 集群资源管理器，v1.x、v2.x都包含，v2.x还提供了功能更强大的CRM
@@ -33,6 +39,7 @@ ha-logd | 集群时间日志服务
 CCM | Consensus Cluster Membership，集群成员一致性管理模块
 PE | Cluster Policy Engine，集群策略引擎，根据CRM对资源的分配做出节点上的服务应该启动还是停止的策略，但不具体实行。只有被选为DC的节点才运行
 Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从集群环境中脱离或重启
+
 ###组件对应软件
 * Messaging Layer
 	* heartbeat：Linux-HA开源项目发布的高可靠应用环境集群服务的核心软件，负责节点健康信息检测、可靠的节点间通讯和集群管理等工，经历了heartbeat v1（集成功能）；heartbear v2（基于进程拆分功能）；heartbeat v3多个版本（基于项目拆分功能）。
@@ -52,7 +59,7 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 	* RGManager：Resource Group (Service) Manager，与cman搭配使用的CRM资源管理。
 	* RHCS：红帽集群套件，通过LVS（Linux Virtual Server）提供负载均衡集群，通过GFS文件系统提供存储集群功能。
 
-###原理图
+###集群事务决策原理
 <center>![图1 HA的集群事务决策模型](http://ww3.sinaimg.cn/large/a8484315gw1f00mmfk00lj20i10fjad5.jpg)</center><br/><center>
 <font size=2>图1 HA的集群事务决策模型</font></center>
 
