@@ -15,7 +15,7 @@ icon: globe
 
 <hr/>
 
-[TOC]
+	[TOC]
 
 <hr/>
 
