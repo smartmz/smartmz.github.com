@@ -94,3 +94,5 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 
 > Keepalived使用的vrrp协议方式，虚拟路由冗余协议 (Virtual Router Redundancy Protocol，简称VRRP)，Heartbeat是基于主机或网络的服务的高可用方式；keepalived的目的是模拟路由器的双机，heartbeat的目的是用户service的双机；LVS的高可用建议用keepavlived，业务的高可用用heartbeat.
 
+
+
