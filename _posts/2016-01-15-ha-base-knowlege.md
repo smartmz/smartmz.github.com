@@ -59,7 +59,7 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 	* RGManager：Resource Group (Service) Manager，与cman搭配使用的CRM资源管理。
 	* RHCS：红帽集群套件，通过LVS（Linux Virtual Server）提供负载均衡集群，通过GFS文件系统提供存储集群功能。
 
-###集群事务决策原理
+###集群事务决策模型
 <center>![图1 HA的集群事务决策模型](http://ww3.sinaimg.cn/large/a8484315gw1f00mmfk00lj20i10fjad5.jpg)</center><br/><center>
 <font size=2>图1 HA的集群事务决策模型</font></center>
 
