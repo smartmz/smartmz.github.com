@@ -88,13 +88,13 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 
 * heartbeat：Linux-HA开源项目发布的高可靠应用环境集群服务的核心软件，负责节点健康信息检测、可靠的节点间通讯和集群管理等工，经历了heartbeat v1（集成功能）；heartbear v2（基于进程拆分功能）；heartbeat v3多个版本（基于项目拆分功能），各个版本之间对heartbeat做了很大的重构。
 	* heartbeat v1.x：单进程实现，功能包括heartbeat、ha-logd、CCM、LRM、Stonith Daemon、CRM (haresource)、PE等，通过haresources配置文件进行配置。
-		* heartbeat v2.x：主要功能由独立进程完成，分为客户端crm和服务端crmd，各个节点都运行服务进程，自带crm命令工具集进行资源管理和配置，功能组件基本维持v1.x版本的所有功能。
-		* **heartbeat v3.x**：大多数组件逐渐出现了多种实现，为了能够在层次上兼容其他开源项目，heartbeat分裂为多个项目：heartbeat+Pacemaker+Cluster-Glue，功能组件包括heartbeat、Cluster Glue、Resource Agent、Pacemacker等。这是本文关注的重点。
-			* heartbeat用于底层信息传递，它是集群间节点联络的基础；
-			* Pacemaker负责CRM资源管理，是HA集群中的核心，也是后文的重点。它不仅可以和heartbeat工作，也可以和corosync（基于OpenAIS）一起工作；实际上目前heartbeat是在Pacemaker项目中的；
-			* Cluster-Glue相当于中间层，将heartbeat（或corosync）和Pacemaker联系起来，包含LRM和STONITH：
-				* LRM负责管理和监控本地的资源，Resource Agents指各种可以启停服务的LSB/OCF/STONITH脚本，必须能够接受参数{start|stop|restart|status}；LSB就是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本；
-				* STONITH，节点心跳系统，通过Heartbeat心跳信息层实现在节点级别对节点进行控制。
+	* heartbeat v2.x：主要功能由独立进程完成，分为客户端crm和服务端crmd，各个节点都运行服务进程，自带crm命令工具集进行资源管理和配置，功能组件基本维持v1.x版本的所有功能。
+	* **heartbeat v3.x**：大多数组件逐渐出现了多种实现，为了能够在层次上兼容其他开源项目，heartbeat分裂为多个项目：heartbeat+Pacemaker+Cluster-Glue，功能组件包括heartbeat、Cluster Glue、Resource Agent、Pacemacker等。这是本文关注的重点。
+		* heartbeat用于底层信息传递，它是集群间节点联络的基础；
+		* Pacemaker负责CRM资源管理，是HA集群中的核心，也是后文的重点。它不仅可以和heartbeat工作，也可以和corosync（基于OpenAIS）一起工作；实际上目前heartbeat是在Pacemaker项目中的；
+		* Cluster-Glue相当于中间层，将heartbeat（或corosync）和Pacemaker联系起来，包含LRM和STONITH：
+		* LRM负责管理和监控本地的资源，Resource Agents指各种可以启停服务的LSB/OCF/STONITH脚本，必须能够接受参数{start|stop|restart|status}；LSB就是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本；
+		* STONITH，节点心跳系统，通过Heartbeat心跳信息层实现在节点级别对节点进行控制。
 	* corosync：OpenAIS发展衍生出来的开放性集群引擎工程。OpenAIS是基于SA Forum标准的集群框架的应用程序接口规范。SA Forum（服务可用性论坛）开发并发布应用接口规范AIS，用来定义应用程序接口的开放性规范的集合。
 	* cman：Cluser Manger，RedHat对OpenAIS的另一种实现。
 		* RGManager：Resource Group (Service) Manager，与cman搭配使用的CRM资源管理。
