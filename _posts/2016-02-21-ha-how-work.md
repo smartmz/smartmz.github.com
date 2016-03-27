@@ -9,7 +9,17 @@ tags: [ha]
 group: archive
 icon: globe
 ---
-　　淘宝TFS分布式存储系统对资源进行存储。TFS由NameServer和DataServer两类节点组成，NameServer接收资源存储请求、整体负责数据创建、删除、复制、均衡、整理等任务的管理和分配，而实际数据的读写工作由DataServer完成。一套完整的TFS集群理论是只需要 1\*NameServer+N\*DataServer，但在实际使用时为了保证TFS提供稳定的存储服务，NameServer推荐通过部署为高可用集群。我们在线上环境中使用了Linux-HA的方案。本文重点来介绍一下Linux-HA的原理和使用。   
+　　淘宝TFS分布式存储系统对资源进行存储。TFS由NameServer和DataServer两类节点组成，NameServer接收资源存储请求、整体负责数据创建、删除、复制、均衡、整理等任务的管理和分配，而实际数据的读写工作由DataServer完成。一套完整的TFS集群理论是只需要 1\*NameServer+N\*DataServer，但在实际使用时为了保证TFS提供稳定的存储服务，NameServer推荐通过部署为高可用集群。我们在线上环境中使用了Linux-HA的方案。本文重点来介绍一下Linux-HA的原理和使用。     
+
+1. 概念和HA模型相关
+2. 编写资源（代理）
+3. 资源分配决策原理
+
+　　通过这三个方面，大家基本上可以掌握HA相关的主要概念和运行原理。   
+
+<hr />
+
+>>>>>>> 002cb69d7e696be030653c552d4a8b7538e9b74d
 　　高可用性HA —— High Availability，指通过尽量缩短因日常维护操作（计划）和突发的系统崩溃（非计划）所导致的停机时间，以提高系统和应用的可用性。HA系统是目前企业防止核心服务系统因故障停机的最有效手段之一。     
 　　Linux-HA项目是高可用HA的一套开源实现，经过多年的应用和重构已经非常成熟。它基于事务驱动，提出一套完整的高可用HA集群事务决策模型，定义了消息传输层、资源分配层、资源层等自下而上三个层次，包括集群间通信、事务触发、资源管理、资源监控等实现。  
 
@@ -20,7 +30,8 @@ icon: globe
 　　本节主要介绍高可用模型的概念及其基本设计原理、模型的缺陷——资源分裂问题。
 
 ###基本概念　　　　　　
-　　为了比较好的理解模型的原理，我们首先介绍HA模型中的各种概念。这里总结了一张表，将HA中的主要组件比拟为一个公司的各种部门和职务，以期从感性上对这些概念有一些认识。在阅读过程中可以在该表中查询，加深理解。
+　　为了理解模型的原理，我们首先介绍HA模型中的各种概念。这里总结了一张表，将HA中的主要组件比拟为一个公司的各种部门和职务，以期对这些概念有一些感性的认识。
+　　大家也可以跳过这一部分，直接从下面的事务决策模型开始阅读，遇到不懂得概念返回这里查询。
 
 | 部件 | 比拟角色 | 含义 |
 | --- | --- | --- |
@@ -34,28 +45,37 @@ icon: globe
 | CIB | 数据库 | Cluster information base，集群信息库，每个节点上都保存一份集群的CIB |
 
 ###其他涉及的概念
+　　除了以上的主要概念，在下文中还会出现一些其他的概念，在这里也列出来：
 
 名称 | 含义
 --- | ---
 haresource | 集群资源管理器，v1.x、v2.x都包含，v2.x还提供了功能更强大的CRM
-ha-logd | 集群时间日志服务
 CCM | Consensus Cluster Membership，集群成员一致性管理模块
 PE | Cluster Policy Engine，集群策略引擎，根据CRM对资源的分配做出节点上的服务应该启动还是停止的策略，但不具体实行。只有被选为DC的节点才运行
 Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从集群环境中脱离或重启
 
 ###集群事务决策模型
+<<<<<<< HEAD
 　　直接上图。
+=======
+　　集群事务决策模型定义了HA系统的整体架构和运行机制。模型将HA系统分为三层，从下到上分别是消息传输、事务决策和监控、资源控制等。这里总结了一张图：
+
+>>>>>>> 002cb69d7e696be030653c552d4a8b7538e9b74d
 <center>![图1 HA的集群事务决策模型](http://ww3.sinaimg.cn/large/a8484315gw1f00mmfk00lj20i10fjad5.jpg)</center><br/><center>
 <font size=2>图1 HA的集群事务决策模型</font></center>
 
+　　从这张图整体是一套HA集群，左右两侧是分配给某一资源的两个节点（可以不只两个），模型各层次的工作流程从下至上是这样的。
+
 ####流程描述：
 * Messaging Layer层负责集群节点间探测消息传输。各节点上部署支持Heartbeat信息交换的工具，通过广播交换心跳信息，并将所有信息聚合到CRM，由CRM统筹管理。心跳信息包含了服务器服务的运行状态信息等。
-* Resource Allocated Layer层负责合理分配集群资源(CIB)、检测资源状态。CRM通过Messaging Layer收集到集群节点的信息从所有节点中选出资源DC节点，DC的PE根据CIB配置分配集群资源，通知给各个节点的CRM，达成一致后，各节点通过LRM下发控制资源的命令。同时LRM还负责对本机资源状态的监控。
+* Resource Allocated Layer层负责合理分配集群资源(CIB)、检测资源状态。CRM通过Messaging Layer收集到集群节点的信息从所有节点中选举出一个DC节点，DC的PE根据CIB配置分配集群资源，通知给各个节点的CRM，达成一致后，各节点通过LRM向上层的RA下发控制资源的命令。同时LRM还负责对本机资源状态的监控。
 * Resource Layer层实现资源的具体控制，比如启停逻辑、监控逻辑等。RA接收LRM的指令对资源进行控制。
 
 ###HA集群的主要类型
-* N-M型：N个节点M个服务，N>M，N-M个备用节点。
-* N-N型：N个节点N个服务。
+　　基于以上的模型，HA系统可以支持单资源多节点、多资源多节点等类型。
+
+* N-M型：N个节点M个资源，N>M，N-M个备用节点。
+* N-N型：N个节点N个资源。
 * **Active/Passive型**：2个节点，同时只有一个主动提供服务，另一个闲置，线上TFS集群使用该类型。
 * Active/Active型：2个节点均为互为镜像。
 
@@ -74,13 +94,13 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 
 * heartbeat：Linux-HA开源项目发布的高可靠应用环境集群服务的核心软件，负责节点健康信息检测、可靠的节点间通讯和集群管理等工，经历了heartbeat v1（集成功能）；heartbear v2（基于进程拆分功能）；heartbeat v3多个版本（基于项目拆分功能），各个版本之间对heartbeat做了很大的重构。
 	* heartbeat v1.x：单进程实现，功能包括heartbeat、ha-logd、CCM、LRM、Stonith Daemon、CRM (haresource)、PE等，通过haresources配置文件进行配置。
-		* heartbeat v2.x：主要功能由独立进程完成，分为客户端crm和服务端crmd，各个节点都运行服务进程，自带crm命令工具集进行资源管理和配置，功能组件基本维持v1.x版本的所有功能。
-		* **heartbeat v3.x**：大多数组件逐渐出现了多种实现，为了能够在层次上兼容其他开源项目，heartbeat分裂为多个项目：heartbeat+Pacemaker+Cluster-Glue，功能组件包括heartbeat、Cluster Glue、Resource Agent、Pacemacker等。这是本文关注的重点。
-			* heartbeat用于底层信息传递，它是集群间节点联络的基础；
-			* Pacemaker负责CRM资源管理，是HA集群中的核心，也是后文的重点。它不仅可以和heartbeat工作，也可以和corosync（基于OpenAIS）一起工作；实际上目前heartbeat是在Pacemaker项目中的；
-			* Cluster-Glue相当于中间层，将heartbeat（或corosync）和Pacemaker联系起来，包含LRM和STONITH：
-				* LRM负责管理和监控本地的资源，Resource Agents指各种的资源的LSB/OCF/STONITH脚本，必须能够接受参数{start|stop|restart|status}；LSB就是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本；
-				* STONITH，节点心跳系统，通过Heartbeat心跳信息层实现在节点级别对节点进行控制。
+	* heartbeat v2.x：主要功能由独立进程完成，分为客户端crm和服务端crmd，各个节点都运行服务进程，自带crm命令工具集进行资源管理和配置，功能组件基本维持v1.x版本的所有功能。
+	* **heartbeat v3.x**：大多数组件逐渐出现了多种实现，为了能够在层次上兼容其他开源项目，heartbeat分裂为多个项目：heartbeat+Pacemaker+Cluster-Glue，功能组件包括heartbeat、Cluster Glue、Resource Agent、Pacemacker等。这是本文关注的重点。
+		* heartbeat用于底层信息传递，它是集群间节点联络的基础；
+		* Pacemaker负责CRM资源管理，是HA集群中的核心，也是后文的重点。它不仅可以和heartbeat工作，也可以和corosync（基于OpenAIS）一起工作；实际上目前heartbeat是在Pacemaker项目中的；
+		* Cluster-Glue相当于中间层，将heartbeat（或corosync）和Pacemaker联系起来，包含LRM和STONITH：
+		* LRM负责管理和监控本地的资源，Resource Agents指各种可以启停服务的LSB/OCF/STONITH脚本，必须能够接受参数{start|stop|restart|status}；LSB就是RedHat提供的/etc/rc.d/init.d/*，OCF是专门与pacemacker兼容的资源代理脚本；
+		* STONITH，节点心跳系统，通过Heartbeat心跳信息层实现在节点级别对节点进行控制。
 	* corosync：OpenAIS发展衍生出来的开放性集群引擎工程。OpenAIS是基于SA Forum标准的集群框架的应用程序接口规范。SA Forum（服务可用性论坛）开发并发布应用接口规范AIS，用来定义应用程序接口的开放性规范的集合。
 	* cman：Cluser Manger，RedHat对OpenAIS的另一种实现。
 		* RGManager：Resource Group (Service) Manager，与cman搭配使用的CRM资源管理。
@@ -92,7 +112,7 @@ Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从
 
 ##[RA]
 　　在上一节中我们已经知道，HA模型的主要工作就是根据集群当前情况对资源进行及时分配调度，达到服务不中断的目的。这里涉及到两方面，一是资源本身，二是根据资源和PE的调度指令对资源实现调度。    
-　　对应到具体的实现上，第一部分内容涉及Pacemaker的调度资源，要注意通常说的**HA资源**并不是指我们希望集群最后提供的服务，而是指具备调度该服务的运行逻辑，也就是RA，因此RA一般要支持服务的启停，高级的还要支持服务的监控、管理等。这一部分我们重点关注OCF类的。    
+　　对应到具体的实现上，第一部分内容涉及Pacemaker的调度资源，要注意通常说的**HA资源**指我们希望集群最后提供的服务，RA是指具备调度该资源的运行逻辑，是资源的代理，但有时大家也会直接将RA称为资源，这是站在HA的角度来说的，RA就是HA最终要调度的资源。RA一般要支持服务的启停，高级的还要支持服务的监控、管理等。这一部分我们重点关注OCF类的。    
 　　第二部分涉及Pacemaker如何进行资源调度，就是CIB配置。集群DC节点上的PE通过CIB配置决策资源在各个节点上的分配，然后由CRM通过节点上的LRM调用RA完成资源的启停。在后面小节中我们重点介绍CIB配置，了解PE分配资源的决策机制。  
 　　Heartbeat v3版本中Pacemaker完成了CRM的全部功能，所以我们谈RA就是要谈Pacemaker支持的RA资源。   
 　　Pacemaker支持的RA资源有Open Cluster Framework(OCF)、Linux Standard Base(LSB)、Systemd、Upstart、System Services、STONITH、Nagios Plugins等多种类型，但常用的主要是两类，LSB和OCF。
@@ -268,271 +288,7 @@ debug 1
 
 > 有关OCF资源更详细的内容请看[官方文档](http://www.linux-ha.org/doc/dev-guides/ra-dev-guide.html)
 
-###实例
-　　这里我们给出TFS-HA OCF资源RA实例，大家可以对照上面的介绍加深理解。
-
-```sh
-#!/bin/sh
-# Initialization:
-. ${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs
-
-getpid() {
-        grep -o '[0-9]*' $1
-}
-
-monitor_nameserver() {
-      if ! test -x $montool
-      then
-              return $OCF_ERR_PERM
-      fi
-      ocf_log debug "begin to monitor $binfile service with command $cmd"
-      cmd="$montool -i $nsip -p $nsport -n"
-      eval $cmd
-      if [ $? -ne 0 ]
-      then
-              return $OCF_ERR_GENERIC
-      else
-              return $OCF_SUCCESS
-      fi
-}
-
-switch_nameserver() {
-    cmd="$montool -i $nsip -p $nsport -n -s 1"
-    eval $cmd
-}
-
-nameserver_status() {
-      if test -f "$pidfile"
-      then
-              if pid=`getpid $pidfile` && [ "$pid" ] && kill -0 $pid
-              then
-                      #status=`check_nameserver_running_status`
-                      return $OCF_SUCCESS
-              else
-                      # pidfile w/o process means the process died
-                      return $OCF_ERR_GENERIC
-              fi
-      else
-              return $OCF_NOT_RUNNING
-      fi
-}
-
-nameserver_start() {
-      if ! nameserver_status
-      then
-              if [ -f "$binfile" ]
-              then
-                      cmd="su - $user -c \"$binfile $cmdline_options\""
-              fi
-              ocf_log debug "Starting $process: $cmd"
-              # Execute the command as created above
-              eval $cmd
-              sleep 1
-
-              if nameserver_status
-              then
-                      ocf_log debug "$process: $cmd started successfully"
-            switch_nameserver
-                      return $OCF_SUCCESS
-              else
-                      ocf_log err "$process: $cmd could not be started"
-                      return $OCF_ERR_GENERIC
-              fi
-      else
-              # If already running, consider start successful
-              ocf_log debug "$process: $cmd is already running"
-        switch_nameserver
-              return $OCF_SUCCESS
-      fi
-}
-
-nameserver_stop() {
-        if [ -n "$OCF_RESKEY_stop_timeout" ]
-        then
-                stop_timeout=$OCF_RESKEY_stop_timeout
-        elif [ -n "$OCF_RESKEY_CRM_meta_timeout" ]; then
-                # Allow 2/3 of the action timeout for the orderly shutdown
-                # (The origin unit is ms, hence the conversion)
-                stop_timeout=$((OCF_RESKEY_CRM_meta_timeout/1500))
-        else
-                stop_timeout=10
-        fi
-
-      if nameserver_status
-      then
-                pid=`getpid $pidfile`
-                kill $pid
-                i=0
-                while [ $i -lt $stop_timeout ]
-                do
-                        if ! nameserver_status
-                        then
-                              rm -f $pidfile
-                                return $OCF_SUCCESS
-                        fi
-                        sleep 1
-                        let "i++"
-                done
-
-                ocf_log warn "Stop with SIGTERM failed/timed out, now sending SIGKILL."
-                kill -9 $pid
-                rm -f $pidfile
-                if ! nameserver_status
-                then
-                        ocf_log warn "SIGKILL did the job."
-                        return $OCF_SUCCESS
-                else
-                        ocf_log err "Failed to stop - even with SIGKILL."
-                        return $OCF_ERR_GENERIC
-                fi
-      else
-              # was not running, so stop can be considered successful
-              ocf_log warn "nameserver not running."
-              rm -f $pidfile
-              return $OCF_SUCCESS
-      fi
-}
-
-nameserver_monitor() {
-      nameserver_status
-      ret=$?
-      if [ $ret -eq $OCF_SUCCESS ]
-      then
-              #ocf_log debug "nameserver_monitor hook func: $OCF_RESKEY_monitor_hook"
-              OCF_RESKEY_monitor_hook="monitor_nameserver"
-              if [ -n "$OCF_RESKEY_monitor_hook" ]; then
-                      eval "$OCF_RESKEY_monitor_hook"
-                        if [ $? -ne $OCF_SUCCESS ]; then
-                                return ${OCF_ERR_GENERIC}
-                        fi
-                      return $OCF_SUCCESS
-              else
-                      true
-              fi
-      else
-              return $ret
-      fi
-}
-
-# FIXME: Attributes special meaning to the resource id
-process="$OCF_RESOURCE_INSTANCE"
-binfile="$OCF_RESKEY_basedir/bin/nameserver"
-cmdline_options="-f $OCF_RESKEY_basedir/conf/ns.conf -d"
-pidfile="$OCF_RESKEY_pidfile"
-[ -z "$pidfile" ] && pidfile="$OCF_RESKEY_basedir/logs/nameserver.pid"
-
-user="$OCF_RESKEY_user"
-[ -z "$user" ] && user=admin
-
-### monitor namserver parameters ########
-nsip="$OCF_RESKEY_nsip"
-nsport="$OCF_RESKEY_nsport"
-montool="$OCF_RESKEY_montool"
-[ -z "$montool" ] && montool="$OCF_RESKEY_basedir/bin/ha_monitor"
-
-nameserver_validate() {
-      if ! su - $user -c "test -x $binfile"
-      then
-              ocf_log err "binfile $binfile does not exist or is not executable by $user."
-              exit $OCF_ERR_INSTALLED
-      fi
-      if ! getent passwd $user >/dev/null 2>&1
-      then
-              ocf_log err "user $user does not exist."
-              exit $OCF_ERR_INSTALLED
-      fi
-      return $OCF_SUCCESS
-}
-
-nameserver_meta() {
-cat <<END
-	<?xml version="1.0"?>
-	<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
-	<resource-agent name="nameserver">
-	<version>1.0</version>
-	<longdesc lang="en">
-		This is a OCF RA to manage tfsv1.4 ha nameserver.
-	</longdesc>
-	<shortdesc lang="en">Manages an tfs nameserver service</shortdesc>
-
-	<parameters>
-		<parameter name="basedir" required="1" unique="1">
-		<longdesc lang="en">nameserver root directory </longdesc>
-		<shortdesc lang="en">Full path name of the binary to be executed</shortdesc>
-		<content type="string"/>
-	</parameter>
-	<parameter name="pidfile" required="0">
-		<longdesc lang="en">
-			File to read/write the PID from/to.
-		</longdesc>
-		<shortdesc lang="en">File to write STDOUT to</shortdesc>
-		<content type="string"/>
-	</parameter>
-	<parameter name="user" required="0">
-		<longdesc lang="en">
-			User to run the command as
-		</longdesc>
-		<shortdesc lang="en">User to run the command as</shortdesc>
-		<content type="string" default="admin"/>
-	</parameter>
-	<parameter name="stop_timeout">
-		<longdesc lang="en">
-			In the stop operation: Seconds to wait for kill -TERM to succeed
-			before sending kill -SIGKILL. Defaults to 2/3 of the stop operation timeout.
-		</longdesc>
-		<shortdesc lang="en">Seconds to wait after having sent SIGTERM before sending SIGKILL in stop operation</shortdesc>
-		<content type="string" default=""/>
-	</parameter>
-	<parameter name="nsip">
-		<longdesc lang="en"> nameserver ipaddr or hostname </longdesc>
-		<shortdesc lang="en">nameserver ipaddr or hostname </shortdesc>
-		<content type="string" default="localhost"/>
-	</parameter>
-	<parameter name="nsport">
-		<longdesc lang="en"> nameserver port </longdesc>
-		<shortdesc lang="en">nameserver port </shortdesc>
-		<content type="integer" default="3100"/>
-	</parameter>
-	<parameter name="montool">
-		<longdesc lang="en"> check nameserver if working well, run as -i ip -p port </longdesc>
-		<shortdesc lang="en"> check nameserver status </shortdesc>
-		<content type="string"/>
-	</parameter>
-</parameters>
-<actions>
-	<action name="start"   timeout="90" />
-	<action name="stop"    timeout="180" />
-	<action name="monitor" depth="0"  timeout="20" interval="5" />
-	<action name="meta-data"  timeout="5" />
-	<action name="validate-all"  timeout="5" />
-</actions>
-</resource-agent>
-END
-exit 0
-}
-
-case "$1" in
-      meta-data|metadata|meta_data)
-              nameserver_meta
-      ;;
-      start)
-              nameserver_start
-      ;;
-      stop)
-              nameserver_stop
-      ;;
-      monitor)
-              nameserver_monitor
-      ;;
-      validate-all)
-              nameserver_validate
-      ;;
-      *)
-              ocf_log err "$0 was called with unsupported arguments: $*"
-              exit $OCF_ERR_UNIMPLEMENTED
-      ;;
-esac
-```
+> 文章附录给出TFS-HA OCF资源RA线上实例，大家可以对照上面的介绍加深理解。
 
 <hr />
 
@@ -1088,4 +844,268 @@ crm(live)configure# commit
 
 　　本文介绍了HA模型原理和Heartbeat v3中RA、Pacemaker的相关原理和配置，涉及到HA模型中关键的CRM、PE决策策略、RA等组件，基本可以将HA的主要原理说清楚了。对于底层的Heartbeat，在实际HA搭建时不需要了解太多，后面有时间再补充。
 
+## 附录1 TFS HA线上RA实例
+
+```sh
+#!/bin/sh
+# Initialization:
+. ${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs
+
+getpid() {
+        grep -o '[0-9]*' $1
+}
+
+monitor_nameserver() {
+      if ! test -x $montool
+      then
+              return $OCF_ERR_PERM
+      fi
+      ocf_log debug "begin to monitor $binfile service with command $cmd"
+      cmd="$montool -i $nsip -p $nsport -n"
+      eval $cmd
+      if [ $? -ne 0 ]
+      then
+              return $OCF_ERR_GENERIC
+      else
+              return $OCF_SUCCESS
+      fi
+}
+
+switch_nameserver() {
+    cmd="$montool -i $nsip -p $nsport -n -s 1"
+    eval $cmd
+}
+
+nameserver_status() {
+      if test -f "$pidfile"
+      then
+              if pid=`getpid $pidfile` && [ "$pid" ] && kill -0 $pid
+              then
+                      #status=`check_nameserver_running_status`
+                      return $OCF_SUCCESS
+              else
+                      # pidfile w/o process means the process died
+                      return $OCF_ERR_GENERIC
+              fi
+      else
+              return $OCF_NOT_RUNNING
+      fi
+}
+
+nameserver_start() {
+      if ! nameserver_status
+      then
+              if [ -f "$binfile" ]
+              then
+                      cmd="su - $user -c \"$binfile $cmdline_options\""
+              fi
+              ocf_log debug "Starting $process: $cmd"
+              # Execute the command as created above
+              eval $cmd
+              sleep 1
+
+              if nameserver_status
+              then
+                      ocf_log debug "$process: $cmd started successfully"
+            switch_nameserver
+                      return $OCF_SUCCESS
+              else
+                      ocf_log err "$process: $cmd could not be started"
+                      return $OCF_ERR_GENERIC
+              fi
+      else
+              # If already running, consider start successful
+              ocf_log debug "$process: $cmd is already running"
+        switch_nameserver
+              return $OCF_SUCCESS
+      fi
+}
+
+nameserver_stop() {
+        if [ -n "$OCF_RESKEY_stop_timeout" ]
+        then
+                stop_timeout=$OCF_RESKEY_stop_timeout
+        elif [ -n "$OCF_RESKEY_CRM_meta_timeout" ]; then
+                # Allow 2/3 of the action timeout for the orderly shutdown
+                # (The origin unit is ms, hence the conversion)
+                stop_timeout=$((OCF_RESKEY_CRM_meta_timeout/1500))
+        else
+                stop_timeout=10
+        fi
+
+      if nameserver_status
+      then
+                pid=`getpid $pidfile`
+                kill $pid
+                i=0
+                while [ $i -lt $stop_timeout ]
+                do
+                        if ! nameserver_status
+                        then
+                              rm -f $pidfile
+                                return $OCF_SUCCESS
+                        fi
+                        sleep 1
+                        let "i++"
+                done
+
+                ocf_log warn "Stop with SIGTERM failed/timed out, now sending SIGKILL."
+                kill -9 $pid
+                rm -f $pidfile
+                if ! nameserver_status
+                then
+                        ocf_log warn "SIGKILL did the job."
+                        return $OCF_SUCCESS
+                else
+                        ocf_log err "Failed to stop - even with SIGKILL."
+                        return $OCF_ERR_GENERIC
+                fi
+      else
+              # was not running, so stop can be considered successful
+              ocf_log warn "nameserver not running."
+              rm -f $pidfile
+              return $OCF_SUCCESS
+      fi
+}
+
+nameserver_monitor() {
+      nameserver_status
+      ret=$?
+      if [ $ret -eq $OCF_SUCCESS ]
+      then
+              #ocf_log debug "nameserver_monitor hook func: $OCF_RESKEY_monitor_hook"
+              OCF_RESKEY_monitor_hook="monitor_nameserver"
+              if [ -n "$OCF_RESKEY_monitor_hook" ]; then
+                      eval "$OCF_RESKEY_monitor_hook"
+                        if [ $? -ne $OCF_SUCCESS ]; then
+                                return ${OCF_ERR_GENERIC}
+                        fi
+                      return $OCF_SUCCESS
+              else
+                      true
+              fi
+      else
+              return $ret
+      fi
+}
+
+# FIXME: Attributes special meaning to the resource id
+process="$OCF_RESOURCE_INSTANCE"
+binfile="$OCF_RESKEY_basedir/bin/nameserver"
+cmdline_options="-f $OCF_RESKEY_basedir/conf/ns.conf -d"
+pidfile="$OCF_RESKEY_pidfile"
+[ -z "$pidfile" ] && pidfile="$OCF_RESKEY_basedir/logs/nameserver.pid"
+
+user="$OCF_RESKEY_user"
+[ -z "$user" ] && user=admin
+
+### monitor namserver parameters ########
+nsip="$OCF_RESKEY_nsip"
+nsport="$OCF_RESKEY_nsport"
+montool="$OCF_RESKEY_montool"
+[ -z "$montool" ] && montool="$OCF_RESKEY_basedir/bin/ha_monitor"
+
+nameserver_validate() {
+      if ! su - $user -c "test -x $binfile"
+      then
+              ocf_log err "binfile $binfile does not exist or is not executable by $user."
+              exit $OCF_ERR_INSTALLED
+      fi
+      if ! getent passwd $user >/dev/null 2>&1
+      then
+              ocf_log err "user $user does not exist."
+              exit $OCF_ERR_INSTALLED
+      fi
+      return $OCF_SUCCESS
+}
+
+nameserver_meta() {
+cat <<END
+	<?xml version="1.0"?>
+	<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+	<resource-agent name="nameserver">
+	<version>1.0</version>
+	<longdesc lang="en">
+		This is a OCF RA to manage tfsv1.4 ha nameserver.
+	</longdesc>
+	<shortdesc lang="en">Manages an tfs nameserver service</shortdesc>
+
+	<parameters>
+		<parameter name="basedir" required="1" unique="1">
+		<longdesc lang="en">nameserver root directory </longdesc>
+		<shortdesc lang="en">Full path name of the binary to be executed</shortdesc>
+		<content type="string"/>
+	</parameter>
+	<parameter name="pidfile" required="0">
+		<longdesc lang="en">
+			File to read/write the PID from/to.
+		</longdesc>
+		<shortdesc lang="en">File to write STDOUT to</shortdesc>
+		<content type="string"/>
+	</parameter>
+	<parameter name="user" required="0">
+		<longdesc lang="en">
+			User to run the command as
+		</longdesc>
+		<shortdesc lang="en">User to run the command as</shortdesc>
+		<content type="string" default="admin"/>
+	</parameter>
+	<parameter name="stop_timeout">
+		<longdesc lang="en">
+			In the stop operation: Seconds to wait for kill -TERM to succeed
+			before sending kill -SIGKILL. Defaults to 2/3 of the stop operation timeout.
+		</longdesc>
+		<shortdesc lang="en">Seconds to wait after having sent SIGTERM before sending SIGKILL in stop operation</shortdesc>
+		<content type="string" default=""/>
+	</parameter>
+	<parameter name="nsip">
+		<longdesc lang="en"> nameserver ipaddr or hostname </longdesc>
+		<shortdesc lang="en">nameserver ipaddr or hostname </shortdesc>
+		<content type="string" default="localhost"/>
+	</parameter>
+	<parameter name="nsport">
+		<longdesc lang="en"> nameserver port </longdesc>
+		<shortdesc lang="en">nameserver port </shortdesc>
+		<content type="integer" default="3100"/>
+	</parameter>
+	<parameter name="montool">
+		<longdesc lang="en"> check nameserver if working well, run as -i ip -p port </longdesc>
+		<shortdesc lang="en"> check nameserver status </shortdesc>
+		<content type="string"/>
+	</parameter>
+</parameters>
+<actions>
+	<action name="start"   timeout="90" />
+	<action name="stop"    timeout="180" />
+	<action name="monitor" depth="0"  timeout="20" interval="5" />
+	<action name="meta-data"  timeout="5" />
+	<action name="validate-all"  timeout="5" />
+</actions>
+</resource-agent>
+END
+exit 0
+}
+
+case "$1" in
+      meta-data|metadata|meta_data)
+              nameserver_meta
+      ;;
+      start)
+              nameserver_start
+      ;;
+      stop)
+              nameserver_stop
+      ;;
+      monitor)
+              nameserver_monitor
+      ;;
+      validate-all)
+              nameserver_validate
+      ;;
+      *)
+              ocf_log err "$0 was called with unsupported arguments: $*"
+              exit $OCF_ERR_UNIMPLEMENTED
+      ;;
+esac
+```
 
