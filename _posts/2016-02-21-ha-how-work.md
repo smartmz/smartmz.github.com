@@ -9,7 +9,7 @@ tags: [ha]
 group: archive
 icon: globe
 ---
-　　私信附件、长文在底层使用淘宝的TFS分布式存储对资源进行存储。TFS由NameServer和DataServer两类节点组成，NameServer接收资源存储请求、整体负责数据创建、删除、复制、均衡、整理等任务的管理和分配，而实际数据的读写工作由DataServer完成。一套完整的TFS集群理论是只需要 1\*NameServer+N\*DataServer，但在实际使用时为了保证TFS提供稳定的存储服务，NameServer推荐通过部署为高可用集群。我们在线上环境中使用了Linux-HA的方案。本文重点来介绍一下Linux-HA的原理和使用。   
+　　淘宝TFS分布式存储系统对资源进行存储。TFS由NameServer和DataServer两类节点组成，NameServer接收资源存储请求、整体负责数据创建、删除、复制、均衡、整理等任务的管理和分配，而实际数据的读写工作由DataServer完成。一套完整的TFS集群理论是只需要 1\*NameServer+N\*DataServer，但在实际使用时为了保证TFS提供稳定的存储服务，NameServer推荐通过部署为高可用集群。我们在线上环境中使用了Linux-HA的方案。本文重点来介绍一下Linux-HA的原理和使用。   
 　　高可用性HA —— High Availability，指通过尽量缩短因日常维护操作（计划）和突发的系统崩溃（非计划）所导致的停机时间，以提高系统和应用的可用性。HA系统是目前企业防止核心服务系统因故障停机的最有效手段之一。     
 　　Linux-HA项目是高可用HA的一套开源实现，经过多年的应用和重构已经非常成熟。它基于事务驱动，提出一套完整的高可用HA集群事务决策模型，定义了消息传输层、资源分配层、资源层等自下而上三个层次，包括集群间通信、事务触发、资源管理、资源监控等实现。  
 
@@ -43,7 +43,7 @@ CCM | Consensus Cluster Membership，集群成员一致性管理模块
 PE | Cluster Policy Engine，集群策略引擎，根据CRM对资源的分配做出节点上的服务应该启动还是停止的策略，但不具体实行。只有被选为DC的节点才运行
 Stonith-Daemon | 根据心跳信息使出现问题的节点（硬件级别）从集群环境中脱离或重启
 
-###集群事务决策原理
+###集群事务决策模型
 　　直接上图。
 <center>![图1 HA的集群事务决策模型](http://ww3.sinaimg.cn/large/a8484315gw1f00mmfk00lj20i10fjad5.jpg)</center><br/><center>
 <font size=2>图1 HA的集群事务决策模型</font></center>
