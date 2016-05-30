@@ -10,11 +10,11 @@ group: archive
 icon: globe
 ---
 
-业务保障流程主要包括问题的预防、发现、定位、快速处理、解决等四个步骤，每部分内部可以通过多种手段增强自动化能力，各部分之间建立信息流转，从而压缩保障时间，不断提高保障效率。
+业务保障流程主要包括问题的预防、发现、定位、快速处理、解决等步骤，每部分内部可以通过多种手段增强自动化能力，各部分之间信息流转，从而压缩保障时间，不断提高保障效率。
 
 <!-- more -->
 
-[](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf4g17vj20go05lq3w.jpg)
+<center style="width:700px;padding-left:100px;">![](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf4g17vj20go05lq3w.jpg)</center>
 
 ### _预防_
 
@@ -24,7 +24,7 @@ icon: globe
 
 发现业务问题，主要通过**实时监控报警、离线分析预警**等手段。实时监控报警需要覆盖视图、声音、邮件、微博、短信等多种渠道让运维和研发尽可能早的发现线上此时此刻接口提供服务异常、流量异常等；离线分析预警手段需要对历史监控数据进行分析比对，尽可能早的发现线上服务接口在服务压力、报错量、耗时等方面，服务资源在负载、性能方面的变化趋势。
 
-[](http://ww2.sinaimg.cn/mw690/a8484315jw1f4dbf445gvj20go09sq4g.jpg)
+<center style="width:500px;padding-left:100px;">![](http://ww3.sinaimg.cn/mw690/a8484315jw1f4dccnnoumj20qj0fkq6l.jpg)</center>
 
 ####  实时接口监控报警
 
@@ -82,7 +82,7 @@ icon: globe
 
 定位问题遵循 **面 > 线 > 点** 的顺序，依靠报警信息可以初步定位问题业务(面)，依靠完整的Grafana监控视图可以初步定位问题链路(接口、依赖、资源)(线)，依靠日志具体定位问题位置(点)。相关工具主要提高定位具体问题位置的能力和效率。
 
-[](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf438fyj20go08twfo.jpg)
+<center style="width:500px;padding-left:100px;">![](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf438fyj20go08twfo.jpg)</center>
 
 1. 日志规范化
 
@@ -108,7 +108,7 @@ icon: globe
 
 处理问题不是解决问题，是快速恢复服务，通过功能降级、封杀、切量、扩容等操作将问题服务隔离，保证整体服务可用。
 
-[](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf40npwj20go0abgmi.jpg)
+<center style="width:500px;padding-left:100px;">![](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf40npwj20go0abgmi.jpg)</center>
 
 1. 降级
 
