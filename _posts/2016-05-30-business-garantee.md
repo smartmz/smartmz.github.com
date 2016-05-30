@@ -2,7 +2,7 @@
 layout: post
 title: "通讯业务保障的思路"
 date: 2016-05-30 08:00
-keywords: 保障
+keywords: garantee
 description: 通讯业务保障的思路
 categories: [system]
 tags: [structure]
