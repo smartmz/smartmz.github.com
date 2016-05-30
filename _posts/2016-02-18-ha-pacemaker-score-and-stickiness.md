@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[HA]Pacemaker的分数机制和资源黏性"
+title: "Pacemaker的分数机制和资源黏性"
 date: 2016-02-18 10:42
 keywords: tfs,ha
 description: Heartbeat v3资源管理层的重点
-categories: [Storage]
+categories: [HA]
 tags: [ha, pacemaker]
 group: archive
 icon: globe

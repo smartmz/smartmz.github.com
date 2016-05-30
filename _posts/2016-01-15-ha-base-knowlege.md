@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[HA]Linux-HA基本原理"
+title: "Linux-HA基本原理"
 date: 2016-01-15 11:18
 keywords: ha
 description: HA基本原理
-categories: [Storage]
+categories: [HA]
 tags: [ha]
 group: archive
 icon: globe

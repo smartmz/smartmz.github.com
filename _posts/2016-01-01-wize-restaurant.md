@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[SOFTWARE]文泽科技餐饮管理"
+title: "文泽科技餐饮管理"
 date: 2016-01-01 00:00
 keywords: software
 description: 文泽科技餐饮管理系列软件

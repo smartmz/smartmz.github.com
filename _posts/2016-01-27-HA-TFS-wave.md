@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[HA]HA-TFS集群服务大幅波动问题"
+title: "TFS-HA集群服务大幅波动问题"
 date: 2016-01-27 16:11
 keywords: ha,tfs
 description: 从TFS集群的运维看HA的运行机制

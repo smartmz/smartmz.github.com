@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[HA]Pacemaker的CIB配置"
+title: "Pacemaker的CIB配置"
 date: 2016-02-16 16:42
 keywords: tfs,ha
 description: Heartbeat v3资源管理层的重点
-categories: [Storage]
+categories: [HA]
 tags: [ha, pacemaker]
 group: archive
 icon: globe

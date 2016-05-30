@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "[HA]Pacemaker定制OCF类RA资源"
+title: "Pacemaker定制OCF类RA资源"
 date: 2016-01-21 12:18
 keywords: ha,ra,ocf
 description: Pacemaker的OCF类RA资源
-categories: [Storage]
+categories: [HA]
 tags: [ha, pacemaker]
 group: archive
 icon: globe
