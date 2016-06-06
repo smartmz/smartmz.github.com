@@ -10,21 +10,31 @@ group: archive
 icon: globe
 ---
 
-业务保障流程主要包括问题的预防、发现、定位、快速处理、解决等步骤，每部分内部可以通过多种手段增强自动化能力，各部分之间信息流转，从而压缩保障时间，不断提高保障效率。
+业务保障流程主要包括问题的预防、发现、定位、快速处理、解决等步骤，在目前已有基础设施的基础上，每部分内部可以通过多种手段增强自动化能力和数据分析能力，更早更快发现业务体系中的问题并采取措施，压缩保障时间，不断提高保障效率。
+
+业务保障一方面依靠业务工程自身能够输出规范有效的监控数据和预留的干预能力，另一方面依靠运维同学在运维层面的干预能力。下面分别对这几部分进行说明。
 
 <!-- more -->
 
-<center style="width:700px;padding-left:100px;">![](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf4g17vj20go05lq3w.jpg)</center>
+<center style="width:700px;padding-left:50px;">![](http://ww3.sinaimg.cn/large/a8484315jw1f4l5yj0mwoj20l607pjsu.jpg)</center>
 
 ### _预防_
 
-在业务的长耗时、重依赖节点处利用**快速失败、限速、线程限制、添加降级机制**等方式防止依赖方出现问题时造成雪崩。
+工程研发过程中，首先根据规范输出精炼有效的日志是业务保障的开始，问题能否快速发现能否快速定位，日志是关键。其次，根据经验和以往的保障标准需要在源码层面加入对可能出现问题的预防措施，最常见的比如在链路的长耗时节点处利用**快速失败、限速**等方式防止耗时过长导致任务阻塞进而影响系统性能；再如，在链路的重依赖节点出利用**线程限制、降级机制**等方式防止依赖方出现问题时造成雪崩；另外，根据实际的业务情况将上下行分离，分别采取保障措施也是一种手段。
+
+* 快速失败
+* 限速
+	* 线程池
+	* 可柱塞的队列
+	* 架构上设计一层通道用于任务传递，和业务逻辑本身解耦
+* 线程限制
+* 开关降级
 
 ### _发现_
 
 发现业务问题，主要通过**实时监控报警、离线分析预警**等手段。实时监控报警需要覆盖视图、声音、邮件、微博、短信等多种渠道让运维和研发尽可能早的发现线上此时此刻接口提供服务异常、流量异常等；离线分析预警手段需要对历史监控数据进行分析比对，尽可能早的发现线上服务接口在服务压力、报错量、耗时等方面，服务资源在负载、性能方面的变化趋势。
 
-<center style="width:500px;padding-left:100px;">![](http://ww3.sinaimg.cn/mw690/a8484315jw1f4dccnnoumj20qj0fkq6l.jpg)</center>
+<center style="width:500px;padding-left:50px;">![](http://ww2.sinaimg.cn/large/a8484315jw1f4l5yitpkyj20ev06gt9w.jpg)</center>
 
 ####  实时接口监控报警
 
@@ -82,7 +92,7 @@ icon: globe
 
 定位问题遵循 **面 > 线 > 点** 的顺序，依靠报警信息可以初步定位问题业务(面)，依靠完整的Grafana监控视图可以初步定位问题链路(接口、依赖、资源)(线)，依靠日志具体定位问题位置(点)。相关工具主要提高定位具体问题位置的能力和效率。
 
-<center style="width:500px;padding-left:100px;">![](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf438fyj20go08twfo.jpg)</center>
+<center style="width:500px;padding-left:50px;">![](http://ww2.sinaimg.cn/mw690/a8484315jw1f4l5yj2y17j209406uwf9.jpg)</center>
 
 1. 日志规范化
 
@@ -108,7 +118,7 @@ icon: globe
 
 处理问题不是解决问题，是快速恢复服务，通过功能降级、封杀、切量、扩容等操作将问题服务隔离，保证整体服务可用。
 
-<center style="width:500px;padding-left:100px;">![](http://ww4.sinaimg.cn/mw690/a8484315jw1f4dbf40npwj20go0abgmi.jpg)</center>
+<center style="width:500px;padding-left:50px;">![](http://ww1.sinaimg.cn/mw690/a8484315jw1f4l5yj1gewj20940590t2.jpg)</center>
 
 1. 降级
 
