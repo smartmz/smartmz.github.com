@@ -9,7 +9,7 @@ tags: [tfs]
 group: archive
 icon: globe
 ---
-#### 表现
+### 表现
 
 线上TFS的DS突然宕机，DS日志看不到有用信息。在查询/var/log/messages的系统日志时，发现以下日志：
 
@@ -19,17 +19,17 @@ Nov 16 08:55:23 yf13401 kernel: dataserver[18232]: segfault at 00002aaae4b40020 
 
 <!-- more -->
 
-#### 解释日志
+### 解释日志
 
-日志|含义
--|-
-Nov 16 08:55:23|日期
-yfxxx|机器host
-kernel: dataserver[18232]|进程和进程号
-segfault at 00002aaae4b40020|访问的非法内存地址
-rip 0000000000416c24|coredump时代码段指针
-rsp 000000004a7beb10|当前栈指针
-error 4|错误码，4就是100，bit2=1, bit1=0, bit0=0
+|日志|含义|
+| --- | --- |
+|Nov 16 08:55:23|日期|
+|yfxxx|机器host|
+|kernel: dataserver[18232]|进程和进程号|
+|segfault at 00002aaae4b40020|访问的非法内存地址|
+|rip 0000000000416c24|coredump时代码段指针|
+|rsp 000000004a7beb10|当前栈指针|
+|error 4|错误码，4就是100，bit2=1, bit1=0, bit0=0|
 
 其中，
 
@@ -39,7 +39,7 @@ error 4|错误码，4就是100，bit2=1, bit1=0, bit0=0
 
 error 4就是说用户态程序内存访问越界，也就是DS的程序\$TFS_HOME/bin/dataserver使用了NULL指针，对应汇编代码的行数为416c24.
 
-#### 看源码
+### 看源码
 
 将dataserver程序反汇编`objdump -d dataserver  > dump`，在dump中查找地址416c24，得到下面片段：
 
@@ -100,7 +100,7 @@ size_ = new_size;
 
 这里使用mremap将内存里的old data重新映射到new data中，而这个data在上面的bucket_size中由get_map_data()获取，在强制转换为IndexHeader*时coredump了。也就是说，remap后的data指针为空了。
 
-#### 为什么
+### 为什么
 
 什么情况下才能出现这种情况呢？再仔细查看一下coredump信息和DS的最后日志:
 ```
