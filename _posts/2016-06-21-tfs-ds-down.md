@@ -9,7 +9,6 @@ tags: [tfs]
 group: archive
 icon: globe
 ---
-
 #### 表现
 
 线上TFS的DS突然宕机，DS日志看不到有用信息。在查询/var/log/messages的系统日志时，发现以下日志：
