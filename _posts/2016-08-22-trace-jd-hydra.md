@@ -18,6 +18,8 @@ icon: globe
 
 实现在基础组件上收集在组件上产生的行为的时间消耗，并且提供跟踪查询页面，对跟踪到的数据进行查询和展示。
 
+<!-- more -->
+
 ![领域模型](http://ww4.sinaimg.cn/mw690/a8484315jw1f73j8gfa9tj213l0oo78k.jpg)
 
 * Trace:一次服务调用追踪链路
@@ -93,21 +95,4 @@ Hydra_data: mysql
 https://github.com/MarsYoung/hydra （fork）
 http://blog.csdn.net/wilsonke/article/details/39935097
 
-
-# Google-Dapper
-# NAVER-Pinpoint
-# 大众点评-CAT
-# Twitter-zipkin
-# Weibo-Watchman
-# 淘宝-Tracing(鹰眼)
-
-# eBay-Centralized Activity Logging (CAL)
-# 唯品会-Mercury（非开源）
-
-功能
-架构（机制）
-可视化（展示方式、技术）
-存储（数据结构、选型）
-数据分析模型
-其他（侵入程度、检测粒度、时效、插件）
 
