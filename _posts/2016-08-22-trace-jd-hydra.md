@@ -91,6 +91,7 @@ Hydra_data: mysql
 ### 参考资料
 
 https://github.com/MarsYoung/hydra （fork）
+http://blog.csdn.net/wilsonke/article/details/39935097
 
 
 # Google-Dapper
