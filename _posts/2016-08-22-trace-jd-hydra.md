@@ -25,7 +25,7 @@ icon: globe
 * Trace:一次服务调用追踪链路
 * Span:追踪服务调基本结构，多span形成树形结构组合成一次Trace追踪记录
 
-	> 	![Span示例](http://ww2.sinaimg.cn/mw690/a8484315jw1f73o6myrmhj20i00dht9c.jpg)
+	> 	![Span示例](http://ww2.sinaimg.cn/mw690/a8484315jw1f73o6myrmhj20i00dht9c.jpg)    
 	> 	在领域模型中，服务A被调用到调用完成的过程，就是一次trace。而每一个服务被调用并返回的过程（一去一回的箭头）为一个Span。可以看到这个示例中包含5个span，client-A，A-B，A-C，C-D，C-E。span本身以树形结构展开，A-C是C-D和C-E的父 span，而client-A是整个树形结构的root span。之后要提到的一个概念就是annotation，annotation代表在服务调用过程中发生的一些我们感兴趣的事情，如图所示C-E上标出 来的那四个点，就是四个annotation，来记录事件时间戳，分别是C服务的cs（client send），E服务的sr（server receive）,E服务的ss（server send）, C服务的cr（client receive）。如果有一些自定义的annotation，会作为BinaryAnnotation，其实就是一个k-v对，记录任何跟踪系统想记录的信息，比如服务调用中的异常信息，重要的业务信息等。
 
 * Annotation:在Span中的标注点，记录整个Span时间段内发生的事件
@@ -92,7 +92,7 @@ Hydra_data: mysql
 
 ### 参考资料
 
-https://github.com/MarsYoung/hydra （fork）
+https://github.com/MarsYoung/hydra （fork）    
 http://blog.csdn.net/wilsonke/article/details/39935097
 
 
