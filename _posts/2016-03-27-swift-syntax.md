@@ -25,6 +25,8 @@ icon: globe
 可以为nil的基础类型：```基础类型?```, 默认值为nil   
 eg: Int? String?
 
+<!-- more -->
+
 #### 枚举类型
 
 ```swift
