@@ -10,10 +10,10 @@ group: archive
 icon: globe
 ---
 
+<!-- more -->
+
 ###描述
 　　由一个历史监控脚本引起。该脚本每隔5分钟检查一次NameServer进程，如果进程不存在，就拉起该进程。具体的，脚本逻辑如下：
-
-<!-- more -->
 
 <center>![图1 NS检测脚本流程](http://ww2.sinaimg.cn/bmiddle/a8484315jw1f0btx2z2owj208o05k0sw.jpg)</center><br/><center><font size=2>图1 NS检测脚本流程</font></center>
 

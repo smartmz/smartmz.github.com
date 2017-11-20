@@ -9,6 +9,9 @@ tags: [swift]
 group: archive
 icon: globe
 ---
+
+<!-- more -->
+
 ## 类型
 
 #### 基础类型
@@ -24,8 +27,6 @@ icon: globe
 
 可以为nil的基础类型：```基础类型?```, 默认值为nil   
 eg: Int? String?
-
-<!-- more -->
 
 #### 枚举类型
 

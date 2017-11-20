@@ -9,10 +9,11 @@ tags: [ha, pacemaker]
 group: archive
 icon: globe
 ---
-　　HA的主要工作就是根据集群当前情况对资源进行分配调度，达到服务不中断的目的。这里涉及到两方面，一是资源本身，二是根据资源和PE的调度指令对资源实现调度。对应到具体的实现上，第一部分内容涉及Pacemaker的调度资源，就是RA，RA重点关注OCF类的；第二部分涉及Pacemaker如何进行资源调度，就是CIB配置。集群DC节点上的PE通过CIB配置决策资源在各个节点上的分配，然后由CRM通过节点上的LRM调用RA完成资源的启停。第一部分参见[《[HA]Pacemaker定制OCF类RA资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第二部分资源调度如何配置。   
 
 <!-- more -->
- 
+
+　　HA的主要工作就是根据集群当前情况对资源进行分配调度，达到服务不中断的目的。这里涉及到两方面，一是资源本身，二是根据资源和PE的调度指令对资源实现调度。对应到具体的实现上，第一部分内容涉及Pacemaker的调度资源，就是RA，RA重点关注OCF类的；第二部分涉及Pacemaker如何进行资源调度，就是CIB配置。集群DC节点上的PE通过CIB配置决策资源在各个节点上的分配，然后由CRM通过节点上的LRM调用RA完成资源的启停。第一部分参见[《[HA]Pacemaker定制OCF类RA资源》](http://smartmz.github.io/2016/01/21/ha-pacemaker-ocf)，本文重点来说第二部分资源调度如何配置。   
+
 　　在Heartbeat v3中，CRM主要由分离项目Pacemaker承担资源管理工作。（Pacemaker的[官方网站](http://clusterlabs.org/wiki/Main_Page))   
 　　目前Pacemaker的版本1.1.14，2016年1月中旬发布，已经支持了CentOS7.包含的组件包括：
 

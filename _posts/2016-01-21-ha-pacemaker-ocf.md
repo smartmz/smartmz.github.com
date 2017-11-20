@@ -8,7 +8,10 @@ categories: [HA]
 tags: [ha, pacemaker]
 group: archive
 icon: globe
----  
+--- 
+
+<!-- more -->
+ 
 　　HA的主要工作就是根据集群当前情况对资源进行分配调度，达到服务不中断的目的。这里涉及到两方面，一是资源本身，二是根据资源和PE的调度指令对资源实现调度。对应到具体的实现上，第一部分内容涉及Pacemaker的调度资源，就是RA，RA重点关注OCF类的；第二部分涉及Pacemaker如何进行资源调度，就是CIB配置。集群DC节点上的PE通过CIB配置决策资源在各个节点上的分配，然后由CRM通过节点上的LRM调用RA完成资源的启停。第二部分参见[《[HA]Pacemaker的CIB配置》](http://smartmz.github.io/2016/02/16/ha-pacemaker-cib)，本文重点来说第一部分。   
 　　Pacemaker 支持的RA资源有Open Cluster Framework(OCF)、Linux Standard Base(LSB)、Systemd、Upstart、System Services、STONITH、Nagios Plugins等多种类型，但主要是两类，LSB和OCF。
 
@@ -16,8 +19,6 @@ icon: globe
 `# crm ra list lsb`
 * OCF 实际上是对 LSB 服务的扩展，增加了一些高可用集群管理的功能如故障监控等和更多的元信息。查看OCF资源可以使用命令：  
 `# crm ra list ocf`
-
-<!-- more -->
 
 　　如果需要pacemaker更好地对服务进行高可用保障，就得实现一个OCF类的RA资源。这是我们在本文重点要说的。   
 　　Pacemaker自带的资源管理程序都在`/usr/lib/ocf/resource.d`目录中。其中的`heartbeat`目录包含了那些自带的常用服务，这些脚本可以作为自己实现的参考。

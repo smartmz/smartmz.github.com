@@ -10,13 +10,13 @@ group: archive
 icon: globe
 ---
 
+<!-- more -->
+
 　　Pacemaker根据CIB配置决策服务在集群节点上的分配情况，原理是怎么样的呢？这里涉及了级别的资源黏性和节点级别的节点分数，它们都是依靠分数机制来表征的，有人也把分数机制叫做得票机制。在[《[HA]Pacemaker的CIB配置》](http://smartmz.github.io/2016/02/16/ha-pacemaker-cib)一文中，提到CIB配置中的stickiness参数和score参数就是针对分数和资源黏性的设置，本文详述。
 
 ###分数值(Value)
 　　分数值是资源黏性、节点分数等的基础，分数值的高低体现资源的黏性程度和节点优先使用级别，是HA做出资源分配、资源迁移决策的直接影响因素。   
 　　Pacemaker支持的分数值有 整数(Integer)、正无穷(+INFINITY)、负无穷(-INFINITY)，无穷在Pacemaker中实现为1,000,000. 分数值之间可以做加减运算：   
-
-<!-- more -->
 
 * Integer 正常运算
 * Any Value + INFINITY = INFINITY

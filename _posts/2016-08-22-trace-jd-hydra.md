@@ -10,6 +10,8 @@ group: Trace
 icon: globe
 ---
 
+<!-- more -->
+
 # 京东-Hydra
 
 对SOA服务提供对基础组件的Trace功能
@@ -17,8 +19,6 @@ icon: globe
 ## 功能
 
 实现在基础组件上收集在组件上产生的行为的时间消耗，并且提供跟踪查询页面，对跟踪到的数据进行查询和展示。
-
-<!-- more -->
 
 ![领域模型](http://ww4.sinaimg.cn/mw690/a8484315jw1f73j8gfa9tj213l0oo78k.jpg)
 

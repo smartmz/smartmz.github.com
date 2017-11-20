@@ -9,6 +9,9 @@ tags: [tfs]
 group: archive
 icon: globe
 ---
+
+<!-- more -->
+
 ### 表现
 
 线上TFS的DS突然宕机，DS日志看不到有用信息。在查询/var/log/messages的系统日志时，发现以下日志：
@@ -16,8 +19,6 @@ icon: globe
 ```
 Nov 16 08:55:23 yf13401 kernel: dataserver[18232]: segfault at 00002aaae4b40020 rip 0000000000416c24 rsp 000000004a7beb10 error 4
 ```
-
-<!-- more -->
 
 ### 解释日志
 

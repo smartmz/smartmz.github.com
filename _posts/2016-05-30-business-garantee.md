@@ -9,11 +9,12 @@ tags: [structure]
 group: archive
 icon: globe
 ---
+
+<!-- more -->
+
 业务保障流程主要包括问题的预防、发现、定位、快速处理、解决等步骤，在目前已有基础设施的基础上，每部分内部可以通过多种手段增强自动化能力和数据分析能力，更早更快发现业务体系中的问题并采取措施，压缩保障时间，不断提高保障效率。
 
 业务保障一方面依靠业务工程自身能够输出规范有效的监控数据和预留的干预能力，另一方面依靠运维同学在运维层面的干预能力。下面分别对这几部分进行说明。
-
-<!-- more -->
 
 <center style="width:700px;padding-left:50px;">![](http://ww3.sinaimg.cn/large/a8484315jw1f4l5yj0mwoj20l607pjsu.jpg)</center>
 
