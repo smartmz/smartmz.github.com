@@ -117,4 +117,4 @@ codepiano :
   # where [HELPER] is the name of the helper you are overriding.
 markdown: redcarpet 
 redcarpet:
-    extensions: [fenced_code_blocks, tables, highlight, with_toc_data, strikethrough, underline, no_intra_emphasis, mathjax, autolink]
+    extensions: [fenced_code_blocks, tables, highlight, with_toc_data, strikethrough, underline, no_intra_emphasis, autolink]
