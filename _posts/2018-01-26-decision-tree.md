@@ -4,7 +4,7 @@ title: "决策树基本原理"
 date: 2018-01-25 15:00
 keywords: java,thread
 description: 机器学习
-categories: [Machine learning]
+categories: [MachineLearning]
 tags: [Machine learning, Decision Tree]
 group: mlearning
 icon: globe
