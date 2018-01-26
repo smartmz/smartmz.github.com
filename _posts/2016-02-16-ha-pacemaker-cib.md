@@ -26,20 +26,23 @@ icon: globe
 * Heartbeat：心跳消息层，替代OpenAIS，系列文章中都使用Heartbeat.
 * CCM：集群成员一致性管理模块。
 
-###内部架构
+### 内部架构
+
 　　引用官方的一张图将[《[HA]Linux-HA基本原理》](http://smartmz.github.io/2016/01/15/ha-base-knowlege)中 *图1 HA的集群事务决策模型* 中的Resource Allocated Layer层进行拓展：
+
 <center>![图1 Pacemaker内部原理图](http://ww3.sinaimg.cn/bmiddle/a8484315jw1f1140i776qj20m80gowh5.jpg)</center><br/><center><font size=2>图1 Pacemaker内部原理图</font></center>
+
 　　CIB使用xml配置集群和当前集群中的所有资源，会在节点之间自动同步。PE通过CIB决策集群如何达到最佳状态（选出master）。  
 　　master选举逻辑根据PE的决策指令在所有的节点中选择一个节点（CRMd）作为master，如果该节点的CRMd出错，会再选择一个。这个选举逻辑官方叫做 DC(Designated Controller)。具体的过程是：  
 　　DC将PE的决策指令按照指定的优先级顺序传递给本节点的LRMd、通过CRMd传递给其他节点的LRMd，同时确定一个希望的（expected）master. 各个节点的LRMd调用TE执行具体的决策指令选出各自认为的master，将结果回传给DC，DC根据之前希望的master和其他节点已经回传的执行结果确定是继续等待优先级高的节点的结果，还是终断本次选举并通知PE再进行一轮选举。   
 　　在一些情况下，为了保护共享数据或者完成数据恢复，DC可能决策某节点需要脱离集群，这需要STONITHd协助完成。    
 　　在整个过程中重点需要搞清楚的有两点：CIB怎么配置，这是本文的重点；DC过程如何选择master，可以参考[《[HA]Pacemaker的分数机制和资源黏性》](http://smartmz.github.io/2016/02/18/ha-pacemaker-score-and-stickiness)    
-###Pacemaker支持的集群模式
+### Pacemaker支持的集群模式
 　　[《[HA]Linux-HA基本原理》](http://smartmz.github.io/2016/01/15/ha-base-knowlege)中提到的几种集群形式Pacemaker都可以支持，在TFS集群的搭建过程中主要使用主备模式，也是相关系列文章关注的模式。    
 　　Pacemaker官方介绍了其他的模式，可以参考[这里](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/_types_of_pacemaker_clusters.html)和[这里](http://clusterlabs.org/wiki/Main_Page)。这些模式实际上是通过CIB的资源分数、节点属性设置实现的。一定要注意，HA集群不仅仅支持两个节点、一个资源，完全可以支持多节点、多资源。
-###CIB配置
+### CIB配置
 　　CIB描述了集群全部信息供DC使用。
-####CIB内容
+#### CIB内容
 　　配置文件cib.xml默认在`/var/lib/heartbeat/crm/cib.xml`，最简单的CIB包括以下几项。
 
 ```xml
@@ -76,7 +79,7 @@ icon: globe
 
 > 配置中的score、stickiness等容易混淆，在配置时只要简单记住score用在constraints中，stickiness用在resource中即可。有关详细内容请参考[《[HA]Pacemaker的分数机制和资源黏性》](http://smartmz.github.io/2016/02/18/ha-pacemaker-score-and-stickiness)。
 
-#####CIB例子
+##### CIB例子
 　　下面通过TFS搭建HA时的CIB配置来说明一些关键的地方。
 
 ```xml
@@ -168,13 +171,13 @@ icon: globe
   </status>
 </cib>
 ```
-####如何操作CIB
+#### 如何操作CIB
 　　官方给了三条**规定**：
 　　1. 不要手动操作cib.xml
 　　2. 遵循第1条
 　　3. 如果不遵循第1条，集群有权拒绝使用手动更改的CIB   
 　　鉴于此，我们需要通过 `cibadmin` 更新CIB。所有的更新及时生效并同步到所有集群节点。
-#####查询（Query）
+##### 查询（Query）
 ```sh
 #cibadmin --query|-Q
 #cibadmin --query|-Q --obj_type {Xml_Node}
@@ -187,7 +190,7 @@ icon: globe
 # cibadmin --replace --xml-file tmp.xml
 ```
 　　结合第二条命令可以只对指定的XML节进行修改，降低修改出错的风险。
-#####删除（Delete）
+##### 删除（Delete）
 ```sh
 cibadmin --delete|-D --crm_xml '{XML_Tag}'
 ```
@@ -199,7 +202,7 @@ cibadmin --delete|-D --crm_xml '{XML_Tag}'
 # cibadmin --delete --crm_xml '<nvpair id="cib-bootstrap-options-stonith-enabled">'
 ```
 　　注意 {XML_Tag}需要指明Tag的id.
-#####更新（Update）
+##### 更新（Update）
 ```sh
 # cibadmin --replace --xml-file tmp.xml
 ```
@@ -212,11 +215,11 @@ cibadmin --delete|-D --crm_xml '{XML_Tag}'
 ```
 > 官方提供了沙箱操作来测试更新后的CIB，可以参考[Making Configuration Changes in a Sandbox](http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/s-config-sandboxes.html)，如果需要，请自行学习，文中不再详述。
 
-###CRM shell
+### CRM shell
 　　启动Pacemaker服务后，更新CIB配置即可让集群运转起来。这里介绍一个工具 crmsh，该工具可以查看当前集群中的资源运行情况，包括查看目前资源的master节点，配置是否正确，集群系统支持的资源类型等，当然也可以对CIB资源进行直接操作配置。   
 　　从pacemaker 1.1.8开始，Crmsh发展成一个独立项目，pacemaker中不再提供，[官方网站](https://savannah.nongnu.org/forum/forum.php?forum_id=7672)提供下载。下载RPM包结合yum解决依赖安装完成。   
 　　在终端直接输入`crm`就进入CRM Shell控制台。按两下`TAB`键提示当前支持的命令，`help`可以查看帮助信息，`help CMD`可以查看具体命令的帮助信息。
-#####查看配置
+##### 查看配置
 ```sh
 # crm
 crm(live)#
@@ -245,7 +248,7 @@ rsc_defaults $id="rsc_defaults-options" \
 	resource-stickiness="100"
 ``` 
 　　结果展示了CIB配置，比起Xml更加简洁明了。
-#####检查配置
+##### 检查配置
 ```sh
 接上
 crm(live)configure# verify
@@ -255,7 +258,7 @@ WARNING: tfs-name-server: specified timeout 30s for stop is smaller than the adv
 crm(live)configure#
 ```
 　　提示我们tfs-name-server资源没有`resource-failure-stickiness`属性。这是因为在Pacemaker 1.0以后，`resource-failure-stickiness`属性被`migration-threshold`属性替代了。
-#####修改配置
+##### 修改配置
 ```sh
 接上
 crm(live)configure# edit
